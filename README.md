@@ -6,9 +6,11 @@ This repository contains custom templates for *Zabbix*. It also contains configu
 
 Here is the file structure you can find:
 
-- **templates**: this directory contains all the custom templates. Instructions per template may be included if necessary
-- **agent**: this directory contains any custom configuration files for the agent
-- **server**: this directory contains any custom configuration files for the server
+- **agent**: this directory contains custom configuration files for the agent
+- **scripts**: this directory contains custom scripts to perform various actions
+- **server**: this directory contains custom configuration files for the server
+- **sudoers.d**: this directory contains custom *sudo* configuration for *Zabbix* agents to run privileged commands without a password
+- **templates**: this directory contains all the custom templates
 
 # Resources
 
