@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>7.4</version>
+    <template_groups>
+        <template_group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
+            <name>Templates</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>e247d70a2bab4004ad68ad10d9f5b068</uuid>
+            <template>Syslog</template>
+            <name>Syslog</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>543cb05fb6554b5987a8f11557945b3c</uuid>
+                    <name>Syslog Listener</name>
+                    <key>net.udp.listen[{$SYSLOG.PORT}]</key>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Syslog</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>5e608b85d0fa46348e42441d462cd822</uuid>
+                            <expression>last(/Syslog/net.udp.listen[{$SYSLOG.PORT}],#1)&lt;&gt;1</expression>
+                            <name>Syslog socket not listening</name>
+                            <event_name>Syslog socket not listening: {ITEM.VALUE}</event_name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$SYSLOG.PORT}</macro>
+                    <value>514</value>
+                    <description>UDP port of the syslog listener</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
