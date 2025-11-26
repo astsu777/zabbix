@@ -1,0 +1,100 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 199c6d1910594cfda4df56070f1b8cbd
+      template: NUT
+      name: NUT
+      description: |
+        The primary goal of the Network UPS Tools (NUT) project is to provide support for Power Devices, such as Uninterruptible Power Supplies, Power Distribution Units, Automatic Transfer Switches, Power Supply Units and Solar Controllers. NUT provides a common protocol and set of tools to monitor and manage such devices, and to consistently name equivalent features and data points, across a vast range of vendor-specific protocols and connection media types.
+        
+        NUT provides many control and monitoring features, with a uniform control and management interface. If you are just getting acquainted with NUT, that page also explains the technical design and some possible set-ups.
+        
+        Source: https://networkupstools.org/
+      groups:
+        - name: Templates
+      items:
+        - uuid: cbe1415589db4bb9a52cb9d2b7e16be1
+          name: 'UPS Battery Charge'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2]'
+          trends: '0'
+          units: '%'
+          description: 'Battery''s charge level'
+          tags:
+            - tag: Application
+              value: NUT
+          triggers:
+            - uuid: 1c5b5e84e9a14f58a3349f694411e9e8
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2],#1)<20'
+              name: 'Battery capacity is critical'
+              event_name: 'Battery capacity is critical: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'Battery needs to be charged now'
+            - uuid: 7ccb9ea822bf44088ba118d7ded40fe0
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2],#1)<50'
+              name: 'Battery capacity is low'
+              event_name: 'Battery capacity is low: {ITEM.VALUE}'
+              priority: AVERAGE
+              description: 'Battery needs to be charged'
+        - uuid: a458d64f7643473fa28738e512ffa6f9
+          name: 'UPS Battery Runtime'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.runtime:''| cut -d " " -f2]'
+          trends: '0'
+          units: s
+          description: 'Battery''s lifetime with current load'
+          tags:
+            - tag: Application
+              value: NUT
+        - uuid: 0cce884fe4f84e489220085fada25eca
+          name: 'UPS Manufacturer'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''device.mfr:''| cut -d " " -f2]'
+          value_type: TEXT
+          description: 'Manufacturer of the UPS'
+          tags:
+            - tag: Application
+              value: NUT
+        - uuid: 7fea066e613f45d48bc39a32fb3edf50
+          name: 'UPS Device Model'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''device.model:''| awk -F'': '' ''{print $2}'']'
+          value_type: TEXT
+          description: 'Model of the UPS'
+          tags:
+            - tag: Application
+              value: NUT
+          triggers:
+            - uuid: 781076f4b2f3446b8e9e722e8dc02be7
+              expression: 'bitlength(last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''device.model:''| awk -F'': '' ''{print $2}'']))=0'
+              name: 'UPS is not detected'
+              event_name: 'UPS is not detected: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'No UPS were detected'
+      tags:
+        - tag: class
+          value: hardware
+        - tag: target
+          value: nut
+      macros:
+        - macro: '{$NUT_SERVER}'
+          description: 'FQDN/IP address of the remote NUT server'
+        - macro: '{$UPS_NAME}'
+          value: ups
+          description: 'Name of the remote UPS'
+  graphs:
+    - uuid: 1b22f73b1edd42bdb38bba9d2d709aac
+      name: 'UPS Battery'
+      graph_items:
+        - drawtype: BOLD_LINE
+          color: '274482'
+          calc_fnc: ALL
+          item:
+            host: NUT
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.runtime:''| cut -d " " -f2]'
+        - sortorder: '1'
+          color: 1A7C11
+          yaxisside: RIGHT
+          calc_fnc: ALL
+          item:
+            host: NUT
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2]'

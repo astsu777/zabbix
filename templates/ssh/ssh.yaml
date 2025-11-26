@@ -1,0 +1,36 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 65fb261aeb814551a08a67aa9d5ee991
+      template: SSH
+      name: SSH
+      description: 'TCP check against SMTP port'
+      groups:
+        - name: Templates
+      items:
+        - uuid: ff2ee73b2925494e9d2b8c09aa8a1a62
+          name: 'SSH Listener'
+          key: 'net.tcp.listen[{$SSH.PORT}]'
+          description: 'TCP check against the SSH port'
+          tags:
+            - tag: Application
+              value: SSH
+          triggers:
+            - uuid: 7b524314e93f49688234dab5d6506a33
+              expression: 'last(/SSH/net.tcp.listen[{$SSH.PORT}],#1)<>1'
+              name: 'SSH socket not listening'
+              event_name: 'SSH socket not listening: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'The TCP connection could not be established'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: ssh
+      macros:
+        - macro: '{$SSH.PORT}'
+          value: '22'
+          description: 'TCP port of the SSH listener'

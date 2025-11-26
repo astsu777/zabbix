@@ -1,0 +1,36 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: e247d70a2bab4004ad68ad10d9f5b068
+      template: Syslog
+      name: Syslog
+      description: 'UDP check against the Syslog port'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 543cb05fb6554b5987a8f11557945b3c
+          name: 'Syslog Listener'
+          key: 'net.udp.listen[{$SYSLOG.PORT}]'
+          description: 'UDP check against the Syslog port'
+          tags:
+            - tag: Application
+              value: Syslog
+          triggers:
+            - uuid: 5e608b85d0fa46348e42441d462cd822
+              expression: 'last(/Syslog/net.udp.listen[{$SYSLOG.PORT}],#1)<>1'
+              name: 'Syslog socket not listening'
+              event_name: 'Syslog socket not listening: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'UDP connection could not be established'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: syslog
+      macros:
+        - macro: '{$SYSLOG.PORT}'
+          value: '514'
+          description: 'UDP port of the syslog listener'

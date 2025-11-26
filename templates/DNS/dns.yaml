@@ -1,0 +1,51 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 4c88089c1c2c4675bda879753576fa11
+      template: DNS
+      name: DNS
+      description: 'Monitor DNS response time'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 30aea572e09145ceb97cca33dfa40c49
+          name: 'DNS Performance'
+          key: 'net.dns.perf[{$DNS_SERVER_IP},{$DNS_RECORD},{$DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          description: 'DNS query and provides the response time'
+          tags:
+            - tag: Application
+              value: DNS
+          triggers:
+            - uuid: 4801d14b0704465e80b0cb003bbdfe0b
+              expression: 'last(/DNS/net.dns.perf[{$DNS_SERVER_IP},{$DNS_RECORD},{$DNS_RECORD_TYPE}],#3)=0'
+              name: 'No response from DNS'
+              event_name: 'No response from DNS: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'There is no response from the DNS server after three queries'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: dns
+      macros:
+        - macro: '{$DNS_RECORD}'
+          description: 'Value for of the DNS record to check (eg.: google.com)'
+        - macro: '{$DNS_RECORD_TYPE}'
+          description: 'Type of DNS record (A, PTR, MX, etc...)'
+        - macro: '{$DNS_SERVER_IP}'
+          description: 'IP address/FQDN of the DNS server to query'
+  graphs:
+    - uuid: 4169c8470d1049e2aac9a1f469d9ae4e
+      name: 'DNS Response Time'
+      yaxismax: '0'
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: DNS
+            key: 'net.dns.perf[{$DNS_SERVER_IP},{$DNS_RECORD},{$DNS_RECORD_TYPE}]'

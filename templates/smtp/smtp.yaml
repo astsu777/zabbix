@@ -1,0 +1,36 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 27118f10c7244c4cb09f08fb863f6d5d
+      template: SMTP
+      name: SMTP
+      description: 'TCP check against SMTP port'
+      groups:
+        - name: Templates
+      items:
+        - uuid: d1218203f74741f8a0fd352844da9190
+          name: 'SMTP Listener'
+          key: 'net.tcp.listen[{$SMTP.PORT}]'
+          description: 'TCP check against the SMTP port'
+          tags:
+            - tag: Application
+              value: SMTP
+          triggers:
+            - uuid: 8b8d4a7f32cd45e494378195c332dbbe
+              expression: 'last(/SMTP/net.tcp.listen[{$SMTP.PORT}],#1)<>1'
+              name: 'SMTP socket not listening'
+              event_name: 'SMTP socket not listening: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'The TCP connection failed to establish'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: smtp
+      macros:
+        - macro: '{$SMTP.PORT}'
+          value: '25'
+          description: 'TCP port of the SMTP listener'

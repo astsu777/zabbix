@@ -1,0 +1,171 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: e5cc2a8a065c4272866ee0277ccc417f
+      template: Postfix
+      name: Postfix
+      description: |
+        ###### INSTALL ######
+        
+        1. Import the template
+        2. Make sure the 'zabbix'  user can execute the command 'sudo /bin/find /var/spool/postfix/ -type f' without prompting for a password
+        3. The following settings must be present in the Zabbix agent's config file:
+        
+        UserParameter=postfix.version, postconf -d mail_version | cut -d '=' -f 2 | tr -d " "
+        UserParameter=mailqueue-postfix,mailq 2>&1 | grep -v 'Mail queue is empty' | grep -c '^[0-9A-Z]'
+        UserParameter=mailqueue-postfix-queue[*], sudo find /var/spool/postfix/ -type f | grep $1 | grep -v -e "/pid/" -e "/defer/" | wc -l
+      groups:
+        - name: Templates
+      items:
+        - uuid: 1c8f49187b15455d83acc4878e3dad81
+          name: 'Number of mails in queue - active'
+          key: 'mailqueue-postfix-queue[active]'
+          delay: '60'
+          history: 30d
+          description: 'Emails in active queue'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: d11d7de6c59c457cb4e5198a5afa4e2e
+              expression: 'min(/Postfix/mailqueue-postfix-queue[active],900s)>10'
+              name: 'High active mail queue ({ITEM.LASTVALUE} mails)'
+              priority: AVERAGE
+              description: 'The active queue is too high and can cause performance issues'
+        - uuid: 700897e349684fa6871d7f6de4e0abc9
+          name: 'Number of mails in queue - deferred'
+          key: 'mailqueue-postfix-queue[deferred]'
+          delay: '60'
+          history: 30d
+          description: 'Emails in deferred queue'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: 862751ff1b1b45898958153d5f537d8c
+              expression: 'min(/Postfix/mailqueue-postfix-queue[deferred],3600s)>500'
+              name: 'High deferred mail queue ({ITEM.LASTVALUE} mails)'
+              priority: WARNING
+              description: 'The number of deferred email is too high indicating a potential configuration issue'
+            - uuid: 9451442409a147669d7610679337b0e4
+              expression: 'min(/Postfix/mailqueue-postfix-queue[deferred],129600s)>50'
+              name: 'High old and deferred mail queue ({ITEM.LASTVALUE} mails)'
+              priority: WARNING
+              description: 'A lot of old emails are present in the deferred queue'
+        - uuid: c39bb96edc4949ec8d4870b46fbda929
+          name: 'SMTP service is running'
+          key: 'net.tcp.service[smtp]'
+          delay: '90'
+          history: 7d
+          description: 'Postfix daemon''s state'
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: 3146b4eff0ba4f6bbc34ed946f1d147b
+              expression: 'last(/Postfix/net.tcp.service[smtp])=0'
+              name: 'SMTP server is down'
+              priority: HIGH
+              description: 'The Postfix daemon is not running'
+        - uuid: 9a8f3c9bde1742b39f42717f55bb5f76
+          name: 'Postfix version'
+          key: postfix.version
+          delay: '3600'
+          history: 30d
+          value_type: CHAR
+          description: 'Installed version of Postfix'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: d4d4e2d541ef495588ee40547af214b3
+              expression: '(last(/Postfix/postfix.version,#1)<>last(/Postfix/postfix.version,#2))>0'
+              name: 'Postfix version has changed'
+              priority: INFO
+              description: 'The version of Postfix has changed indicating an update or a downgrade occurred'
+        - uuid: 0826095ad3084f758b3e119efa917608
+          name: 'Number of $1 processes'
+          key: 'proc.num[master]'
+          delay: '60'
+          history: 7d
+          description: 'Postfix master processes'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: 80c2d40244824c75b1b5864b5279b1b6
+              expression: 'last(/Postfix/proc.num[master])=0'
+              name: 'No master process running'
+              priority: AVERAGE
+              description: 'No master process running indicating Postfix does not work properly'
+        - uuid: c3cfc59df24544ba8cf5f3281bf38219
+          name: 'Number of $1 processes'
+          key: 'proc.num[qmgr]'
+          delay: '60'
+          history: 7d
+          description: 'Postfix queue manager processes'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: a9345d29f4bb4fc69e49149b246d9409
+              expression: 'last(/Postfix/proc.num[qmgr])=0'
+              name: 'No qmgr process running'
+              priority: AVERAGE
+              description: 'No queues are running: this means no emails will be delivered'
+              dependencies:
+                - name: 'No master process running'
+                  expression: 'last(/Postfix/proc.num[master])=0'
+        - uuid: 4e730eb8d0254d2caf4d65f3cc9473a6
+          name: 'Number of $1 processes'
+          key: 'proc.num[tlsmgr]'
+          delay: '60'
+          history: 7d
+          description: 'Postfix TLS sessions manager'
+          tags:
+            - tag: Application
+              value: Postfix
+          triggers:
+            - uuid: ace606e0c2504c4f9c3d8d214c0ac620
+              expression: 'last(/Postfix/proc.num[tlsmgr])=0'
+              name: 'No tlsmgr process running'
+              priority: AVERAGE
+              description: 'No TLS manager processes are running: encryption will not work'
+              dependencies:
+                - name: 'No master process running'
+                  expression: 'last(/Postfix/proc.num[master])=0'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: postfix
+      valuemaps:
+        - uuid: 9701ee0256984ed4b93ff8ae78822d7f
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
+  graphs:
+    - uuid: fbd69836c10f48e49560d3c1b1008bce
+      name: 'Postfix - mail queue'
+      show_triggers: 'NO'
+      type: STACKED
+      show_legend: 'NO'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 00EE00
+          item:
+            host: Postfix
+            key: 'mailqueue-postfix-queue[active]'
+        - sortorder: '1'
+          color: 0000C8
+          item:
+            host: Postfix
+            key: 'mailqueue-postfix-queue[deferred]'
