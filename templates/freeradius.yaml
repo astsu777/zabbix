@@ -1,0 +1,473 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: f714256d5bfe42bca013999e43a376e4
+      template: FreeRADIUS
+      name: FreeRADIUS
+      groups:
+        - name: Templates
+      items:
+        - uuid: 6937c2e71a04490295733b9dc7f67568
+          name: FreeRADIUS-Total-Access-Accepts
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Access-Accepts
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Access-Requests = 39157
+            	FreeRADIUS-Total-Access-Accepts = 382
+            	FreeRADIUS-Total-Access-Rejects = 38689
+            	FreeRADIUS-Total-Access-Challenges = 0
+            	FreeRADIUS-Total-Auth-Responses = 39071
+            	FreeRADIUS-Total-Auth-Duplicate-Requests = 87
+            	FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            	FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            	FreeRADIUS-Total-Auth-Dropped-Requests = 87
+            	FreeRADIUS-Total-Auth-Unknown-Types = 0
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Access-Accepts = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 67841a286e9942a1a24b72e514ec27e6
+          name: FreeRADIUS-Total-Access-Rejects
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Access-Rejects
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Access-Requests = 39157
+            	FreeRADIUS-Total-Access-Accepts = 382
+            	FreeRADIUS-Total-Access-Rejects = 38689
+            	FreeRADIUS-Total-Access-Challenges = 0
+            	FreeRADIUS-Total-Auth-Responses = 39071
+            	FreeRADIUS-Total-Auth-Duplicate-Requests = 87
+            	FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            	FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            	FreeRADIUS-Total-Auth-Dropped-Requests = 87
+            	FreeRADIUS-Total-Auth-Unknown-Types = 0
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Access-Rejects = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 52b175bc303645d488f8e921f793de7e
+          name: FreeRADIUS-Total-Access-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Access-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Access-Requests = 39157
+            	FreeRADIUS-Total-Access-Accepts = 382
+            	FreeRADIUS-Total-Access-Rejects = 38689
+            	FreeRADIUS-Total-Access-Challenges = 0
+            	FreeRADIUS-Total-Auth-Responses = 39071
+            	FreeRADIUS-Total-Auth-Duplicate-Requests = 87
+            	FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            	FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            	FreeRADIUS-Total-Auth-Dropped-Requests = 87
+            	FreeRADIUS-Total-Auth-Unknown-Types = 0
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Access-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: e09dadacc8ba47f4a627947d24ea02e4
+          name: FreeRADIUS-Total-Accounting-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Accounting-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Accounting-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: bd977528c3e347198c7ebf7582671561
+          name: FreeRADIUS-Total-Accounting-Responses
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Accounting-Responses
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Accounting-Responses = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: a49a059e252b47c6991aa9595450d579
+          name: FreeRADIUS-Total-Acct-Dropped-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Acct-Dropped-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Acct-Dropped-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 445a2f81a16342d3bf6960f7c06fc604
+          name: FreeRADIUS-Total-Acct-Duplicate-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Acct-Duplicate-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Acct-Duplicate-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 1b00a6b612d142ff9789e3cc4e287aaf
+          name: FreeRADIUS-Total-Acct-Invalid-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Acct-Invalid-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Acct-Invalid-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 3c6d6f07035d4f65a177c9b529758539
+          name: FreeRADIUS-Total-Acct-Malformed-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Acct-Malformed-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Acct-Malformed-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 8d4ad9bf7351401ab16badd55415d033
+          name: FreeRADIUS-Total-Acct-Unknown-Types
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Acct-Unknown-Types
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Accounting-Requests
+            FreeRADIUS-Total-Accounting-Responses
+            FreeRADIUS-Total-Acct-Duplicate-Requests
+            FreeRADIUS-Total-Acct-Malformed-Requests
+            FreeRADIUS-Total-Acct-Invalid-Requests
+            FreeRADIUS-Total-Acct-Dropped-Requests
+            FreeRADIUS-Total-Acct-Unknown-Types
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Acct-Unknown-Types = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 09ad95d4c8bd4981b7eb9178126437c9
+          name: FreeRADIUS-Total-Auth-Dropped-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Auth-Dropped-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Access-Requests = 39157
+            	FreeRADIUS-Total-Access-Accepts = 382
+            	FreeRADIUS-Total-Access-Rejects = 38689
+            	FreeRADIUS-Total-Access-Challenges = 0
+            	FreeRADIUS-Total-Auth-Responses = 39071
+            	FreeRADIUS-Total-Auth-Duplicate-Requests = 87
+            	FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            	FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            	FreeRADIUS-Total-Auth-Dropped-Requests = 87
+            	FreeRADIUS-Total-Auth-Unknown-Types = 0
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Auth-Dropped-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: dc4d0c7599c9440cbb5dc0e1e83e7d49
+          name: FreeRADIUS-Total-Auth-Duplicate-Requests
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Auth-Duplicate-Requests
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Access-Requests = 39157
+            	FreeRADIUS-Total-Access-Accepts = 382
+            	FreeRADIUS-Total-Access-Rejects = 38689
+            	FreeRADIUS-Total-Access-Challenges = 0
+            	FreeRADIUS-Total-Auth-Responses = 39071
+            	FreeRADIUS-Total-Auth-Duplicate-Requests = 87
+            	FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            	FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            	FreeRADIUS-Total-Auth-Dropped-Requests = 87
+            	FreeRADIUS-Total-Auth-Unknown-Types = 0
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Auth-Duplicate-Requests = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 581b68a7488b4bbaaade2a4b9a131498
+          name: FreeRADIUS-Total-Auth-Responses
+          type: DEPENDENT
+          key: FreeRADIUS-Total-Auth-Responses
+          history: 90d
+          description: |
+            FreeRADIUS-Total-Access-Requests = 39157
+            	FreeRADIUS-Total-Access-Accepts = 382
+            	FreeRADIUS-Total-Access-Rejects = 38689
+            	FreeRADIUS-Total-Access-Challenges = 0
+            	FreeRADIUS-Total-Auth-Responses = 39071
+            	FreeRADIUS-Total-Auth-Duplicate-Requests = 87
+            	FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            	FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            	FreeRADIUS-Total-Auth-Dropped-Requests = 87
+            	FreeRADIUS-Total-Auth-Unknown-Types = 0
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - 'FreeRADIUS-Total-Auth-Responses = (\d+)'
+                - \1
+            - type: CHANGE_PER_SECOND
+          master_item:
+            key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: d81aa00939a049c1ae072437fb7334f6
+          name: 'RADIUS Auth Statistics'
+          key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 1, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          delay: '30'
+          history: 90d
+          value_type: TEXT
+          description: |
+            FreeRADIUS-Total-Access-Requests = 430392
+            FreeRADIUS-Total-Access-Accepts = 164563
+            FreeRADIUS-Total-Access-Rejects = 235754
+            FreeRADIUS-Total-Access-Challenges = 0
+            FreeRADIUS-Total-Auth-Responses = 400317
+            FreeRADIUS-Total-Auth-Duplicate-Requests = 120
+            FreeRADIUS-Total-Auth-Malformed-Requests = 0
+            FreeRADIUS-Total-Auth-Invalid-Requests = 0
+            FreeRADIUS-Total-Auth-Dropped-Requests = 120
+            FreeRADIUS-Total-Auth-Unknown-Types = 0
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 17e68a6a199a486894b464db8961c1ab
+          name: 'RADIUS Accounting Statistics'
+          key: 'system.run["echo ''Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 2, Response-Packet-Type = Access-Accept'' | radclient -x 127.0.0.1:18121 status ''{$RADIUS_SECRET}''  |  grep ''FreeRADIUS-Total'' "]'
+          delay: '30'
+          history: 90d
+          value_type: TEXT
+          description: |
+            FreeRADIUS-Total-Accounting-Requests = 29456
+            FreeRADIUS-Total-Accounting-Responses = 29385
+            FreeRADIUS-Total-Acct-Duplicate-Requests = 56
+            FreeRADIUS-Total-Acct-Malformed-Requests = 0
+            FreeRADIUS-Total-Acct-Invalid-Requests = 0
+            FreeRADIUS-Total-Acct-Dropped-Requests = 71
+            FreeRADIUS-Total-Acct-Unknown-Types = 0
+          tags:
+            - tag: Application
+              value: Radius
+        - uuid: 081f179fe82047bea945a0925d83973e
+          name: 'RADIUS Auth Test'
+          key: 'system.run[echo "Message-Authenticator = 0x00" | radclient -x -s localhost:18121 status adminsecret | grep Accepted | awk {''print $3''}]'
+          delay: '30'
+          history: 90d
+          trends: '0'
+          description: |
+            Packet summary:
+                    Accepted      : 1
+                    Rejected      : 0
+                    Lost          : 0
+                    Passed filter : 1
+                    Failed filter : 0
+          tags:
+            - tag: Application
+              value: Radius
+          triggers:
+            - uuid: c395e56e6bd345e988cf918a161e6465
+              expression: 'last(/FreeRADIUS/system.run[echo "Message-Authenticator = 0x00" | radclient -x -s localhost:18121 status adminsecret | grep Accepted | awk {''print $3''}])<>1'
+              name: 'FreeRADIUS: failed auth'
+              event_name: 'FreeRADIUS: failed auth {ITEM.VALUE}'
+              priority: DISASTER
+      macros:
+        - macro: '{$RADIUS_SECRET}'
+          value: adminsecret
+  graphs:
+    - uuid: 77f13312bed64d91ae8034aff0328fa8
+      name: FreeRADIUS-Accounting
+      graph_items:
+        - color: 00C800
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Accounting-Requests
+        - sortorder: '1'
+          color: C80000
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Accounting-Responses
+        - sortorder: '2'
+          color: 0000C8
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Acct-Dropped-Requests
+        - sortorder: '3'
+          color: C800C8
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Acct-Duplicate-Requests
+        - sortorder: '4'
+          color: 00C8C8
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Acct-Invalid-Requests
+        - sortorder: '5'
+          color: C8C800
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Acct-Malformed-Requests
+        - sortorder: '6'
+          color: C8C8C8
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Acct-Unknown-Types
+    - uuid: bcc9a7757cc947b3a1316e80eeac3b87
+      name: FreeRADIUS-Authentication
+      graph_items:
+        - item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Access-Accepts
+        - sortorder: '1'
+          color: '960000'
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Access-Rejects
+        - sortorder: '2'
+          color: '000096'
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Access-Requests
+        - sortorder: '3'
+          color: '960096'
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Auth-Dropped-Requests
+        - sortorder: '4'
+          color: '009696'
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Auth-Duplicate-Requests
+        - sortorder: '5'
+          color: '969600'
+          item:
+            host: FreeRADIUS
+            key: FreeRADIUS-Total-Auth-Responses
