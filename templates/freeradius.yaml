@@ -7,6 +7,22 @@ zabbix_export:
     - uuid: f714256d5bfe42bca013999e43a376e4
       template: FreeRADIUS
       name: FreeRADIUS
+      description: |
+        ##Install
+        
+        #####1. Enable status server in Freeradius
+        
+        Enable status server functionality you need to set the following in radiusd.conf:
+        
+        status_server = yes
+        
+        FreeRADIUS will only respond to status-server messages, if the status-server virtual server has been enabled. To do this, create a link from the sites-enabled directory to the status file in the sites-available directory:
+        
+        cd sites-enabled
+        ln -s ../sites-available/status status
+        
+        Restart/reload your RADIUS server. You will notice that a new server listens on port 18121/udp of localhost.
+        If you want other clients than localhost to query this server, change the listen section of the new server. You should also change the default password in the client section of the site. Add more clients as needed.
       groups:
         - name: Templates
       items:
@@ -379,7 +395,7 @@ zabbix_export:
               value: Radius
         - uuid: 081f179fe82047bea945a0925d83973e
           name: 'RADIUS Auth Test'
-          key: 'system.run[echo "Message-Authenticator = 0x00" | radclient -x -s localhost:18121 status adminsecret | grep Accepted | awk {''print $3''}]'
+          key: 'system.run[echo "Message-Authenticator = 0x00" | radclient -x -s localhost:18121 status {$RADIUS_SECRET} | grep Accepted | awk {''print $3''}]'
           delay: '30'
           history: 90d
           trends: '0'
@@ -395,10 +411,16 @@ zabbix_export:
               value: Radius
           triggers:
             - uuid: c395e56e6bd345e988cf918a161e6465
-              expression: 'last(/FreeRADIUS/system.run[echo "Message-Authenticator = 0x00" | radclient -x -s localhost:18121 status adminsecret | grep Accepted | awk {''print $3''}])<>1'
+              expression: 'last(/FreeRADIUS/system.run[echo "Message-Authenticator = 0x00" | radclient -x -s localhost:18121 status {$RADIUS_SECRET} | grep Accepted | awk {''print $3''}])<>1'
               name: 'FreeRADIUS: failed auth'
               event_name: 'FreeRADIUS: failed auth {ITEM.VALUE}'
               priority: DISASTER
+              description: 'The authentication against the RADIUS server failed'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: freeradius
       macros:
         - macro: '{$RADIUS_SECRET}'
           value: adminsecret
