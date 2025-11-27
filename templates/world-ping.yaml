@@ -1,0 +1,558 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 09687545c0c145aa80fd3293a750d1ed
+      template: 'World Ping'
+      name: 'World Ping'
+      description: 'Send ICMP ping tests towards various servers in the world'
+      readme: |
+        ## Setup
+        
+        Set `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`
+        
+      groups:
+        - name: Templates
+      items:
+        - uuid: 56694594f4924b788a7405bdbc607a5f
+          name: 'AS ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$AS_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 7ffb02e81fe14396a80453397d6b4f9e
+          name: 'CEE ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$CEE_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: ec65ab572ffb4023aaaefc53ddf39e61
+          name: 'MENA ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$MENA_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 02b15488ac904671a48c61b7ae0e66c4
+          name: 'NA ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$NA_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 08bbe5f7fd7d4f0a84b56da1d1a39c49
+          name: 'SA ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$SA_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: da7cb47abe0d406da893839c9f1312bc
+          name: 'WEU ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$WEU_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 038c9f7d9a06499493324a3a7e6851e6
+          name: 'ZA ICMP loss'
+          type: SIMPLE
+          key: 'icmppingloss[{$ZA_TARGET}]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The percentage of lost packets.'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 5d31b3f8a4d846e5b68de993ab843262
+          name: 'AS ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$AS_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: ad09b0b24e9e44c4903c40493a417db0
+          name: 'CEE ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$CEE_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: d1145ff059f3465994b41b13eaa85367
+          name: 'MENA ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$MENA_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 3865690b70f24bbfbe9a7d408b2e8b66
+          name: 'NA ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$NA_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: e22739fedb854089b6e39baae0be4756
+          name: 'SA ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$SA_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 05ca4a34a22f47d4bc8b378f29c521a0
+          name: 'WEU ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$WEU_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 1fd6e486c1384f40b14263927cab05b3
+          name: 'ZA ICMP response time'
+          type: SIMPLE
+          key: 'icmppingsec[{$ZA_TARGET}]'
+          value_type: FLOAT
+          units: s
+          description: 'The ICMP ping response time (in seconds).'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: b2c31f5e4fb3435cbf46a791035bdae3
+          name: 'AS ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$AS_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 7ccd8020bb7042dc902539fc2df2f587
+          name: 'CEE ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$CEE_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 25db05211f49478e9169c8b466e10bf2
+          name: 'MENA ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$MENA_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 5fbe91d610d64c67861656768a6c3a0e
+          name: 'NA ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$NA_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 8854c9f2aa5648aba45351011b6518fe
+          name: 'SA ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$SA_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 0b4ffa5056184ab5b55d31d8d2a179cd
+          name: 'WEU ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$WEU_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+        - uuid: 4e0254c0e3f24f5f996d0ba2b177d1f0
+          name: 'ZA ICMP ping'
+          type: SIMPLE
+          key: 'icmpping[{$ZA_TARGET}]'
+          description: |
+            The host accessibility by ICMP ping.
+            
+            0 - ICMP ping fails;
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+      tags:
+        - tag: class
+          value: network
+        - tag: target
+          value: icmp
+      macros:
+        - macro: '{$AS_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+          config:
+            type: TEXT
+            priority: '1'
+            section_name: Thresholds
+            label: 'Threshold of ICMP packet loss'
+            description: 'Warning threshold of ICMP packet loss in %. In the range from 0 to 100 inclusive.'
+            regex: '^-?([0-9]+|(([0-9]+)\.([0-9]+)))$'
+        - macro: '{$AS_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+          config:
+            type: TEXT
+            priority: '2'
+            section_name: Thresholds
+            label: 'Threshold of the average ICMP response'
+            description: 'Warning threshold of the average ICMP response time in seconds. No less than 0.'
+            regex: '^-?([0-9]+|(([0-9]+)\.([0-9]+)))$'
+        - macro: '{$AS_TARGET}'
+          value: www.baidu.com
+          description: 'Server located in Asia'
+        - macro: '{$CEE_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$CEE_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+        - macro: '{$CEE_TARGET}'
+          value: vk.com
+          description: 'Server located in Eastern Europe'
+        - macro: '{$MENA_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$MENA_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+        - macro: '{$MENA_TARGET}'
+          value: jazeerauniversity.edu.so
+          description: 'Server located in North Africa'
+        - macro: '{$NA_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$NA_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+        - macro: '{$NA_TARGET}'
+          value: mit.edu
+          description: 'Server located in North America'
+        - macro: '{$SA_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$SA_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+        - macro: '{$SA_TARGET}'
+          value: uol.com.br
+          description: 'Server located in South America'
+        - macro: '{$WEU_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$WEU_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+        - macro: '{$WEU_TARGET}'
+          value: cern.ch
+          description: 'Server located in Western Europe'
+        - macro: '{$ZA_ICMP_LOSS_WARN}'
+          value: '20'
+          description: 'Warning threshold of ICMP packet loss in %.'
+        - macro: '{$ZA_ICMP_RESPONSE_TIME_WARN}'
+          value: '0.15'
+          description: 'Warning threshold of the average ICMP response time in seconds.'
+        - macro: '{$ZA_TARGET}'
+          value: www.naspers.com
+          description: 'Server located in South Africa'
+      valuemaps:
+        - uuid: 7f9c49c4e3d247269743b66442d1f938
+          name: 'Service state'
+          mappings:
+            - value: '0'
+              newvalue: Down
+            - value: '1'
+              newvalue: Up
+  triggers:
+    - uuid: 180515e9077342f49aefd37d31635c93
+      expression: |
+        (min(/World Ping/icmppingloss[{$WEU_TARGET}],5m)>{$WEU_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$WEU_TARGET}],5m)<100)
+        or
+        (min(/World Ping/icmppingloss[{$CEE_TARGET}],5m)>{$CEE_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$CEE_TARGET}],5m)<100)
+        or
+        (min(/World Ping/icmppingloss[{$MENA_TARGET}],5m)>{$MENA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$MENA_TARGET}],5m)<100)
+        or
+        (min(/World Ping/icmppingloss[{$NA_TARGET}],5m)>{$NA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$NA_TARGET}],5m)<100)
+        or
+        (min(/World Ping/icmppingloss[{$SA_TARGET}],5m)>{$SA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$SA_TARGET}],5m)<100)
+        or
+        (min(/World Ping/icmppingloss[{$ZA_TARGET}],5m)>{$ZA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$ZA_TARGET}],5m)<100)
+        or
+        (min(/World Ping/icmppingloss[{$AS_TARGET}],5m)>{$AS_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$AS_TARGET}],5m)<100)
+      name: 'ICMP Ping: High ICMP ping loss'
+      opdata: 'Loss: {ITEM.LASTVALUE1}'
+      status: DISABLED
+      priority: WARNING
+      description: 'ICMP packets loss detected.'
+      type: MULTIPLE
+      dependencies:
+        - name: 'ICMP Ping: Unavailable by ICMP ping'
+          expression: |
+            max(/World Ping/icmpping[{$WEU_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$CEE_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$MENA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$NA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$SA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$ZA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$AS_TARGET}],#3)=0
+      tags:
+        - tag: scope
+          value: availability
+        - tag: scope
+          value: performance
+    - uuid: b20ef4dcc4344af9943f244560b2dbda
+      expression: |
+        avg(/World Ping/icmppingsec[{$WEU_TARGET}],5m)>{$WEU_ICMP_RESPONSE_TIME_WARN}
+        or
+        avg(/World Ping/icmppingsec[{$CEE_TARGET}],5m)>{$CEE_ICMP_RESPONSE_TIME_WARN}
+        or
+        avg(/World Ping/icmppingsec[{$MENA_TARGET}],5m)>{$MENA_ICMP_RESPONSE_TIME_WARN}
+        or
+        avg(/World Ping/icmppingsec[{$NA_TARGET}],5m)>{$NA_ICMP_RESPONSE_TIME_WARN}
+        or
+        avg(/World Ping/icmppingsec[{$SA_TARGET}],5m)>{$SA_ICMP_RESPONSE_TIME_WARN}
+        or
+        avg(/World Ping/icmppingsec[{$ZA_TARGET}],5m)>{$ZA_ICMP_RESPONSE_TIME_WARN}
+        or
+        avg(/World Ping/icmppingsec[{$AS_TARGET}],5m)>{$AS_ICMP_RESPONSE_TIME_WARN}
+      name: 'ICMP Ping: High ICMP ping response time'
+      opdata: 'Value: {ITEM.LASTVALUE1}'
+      status: DISABLED
+      priority: WARNING
+      description: 'Average ICMP response time is too high.'
+      type: MULTIPLE
+      dependencies:
+        - name: 'ICMP Ping: High ICMP ping loss'
+          expression: |
+            (min(/World Ping/icmppingloss[{$WEU_TARGET}],5m)>{$WEU_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$WEU_TARGET}],5m)<100)
+            or
+            (min(/World Ping/icmppingloss[{$CEE_TARGET}],5m)>{$CEE_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$CEE_TARGET}],5m)<100)
+            or
+            (min(/World Ping/icmppingloss[{$MENA_TARGET}],5m)>{$MENA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$MENA_TARGET}],5m)<100)
+            or
+            (min(/World Ping/icmppingloss[{$NA_TARGET}],5m)>{$NA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$NA_TARGET}],5m)<100)
+            or
+            (min(/World Ping/icmppingloss[{$SA_TARGET}],5m)>{$SA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$SA_TARGET}],5m)<100)
+            or
+            (min(/World Ping/icmppingloss[{$ZA_TARGET}],5m)>{$ZA_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$ZA_TARGET}],5m)<100)
+            or
+            (min(/World Ping/icmppingloss[{$AS_TARGET}],5m)>{$AS_ICMP_LOSS_WARN} and min(/World Ping/icmppingloss[{$AS_TARGET}],5m)<100)
+        - name: 'ICMP Ping: Unavailable by ICMP ping'
+          expression: |
+            max(/World Ping/icmpping[{$WEU_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$CEE_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$MENA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$NA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$SA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$ZA_TARGET}],#3)=0
+            or
+            max(/World Ping/icmpping[{$AS_TARGET}],#3)=0
+      tags:
+        - tag: scope
+          value: availability
+        - tag: scope
+          value: performance
+    - uuid: 8aa53605d964480294571ac9a93964a0
+      expression: |
+        max(/World Ping/icmpping[{$WEU_TARGET}],#3)=0
+        or
+        max(/World Ping/icmpping[{$CEE_TARGET}],#3)=0
+        or
+        max(/World Ping/icmpping[{$MENA_TARGET}],#3)=0
+        or
+        max(/World Ping/icmpping[{$NA_TARGET}],#3)=0
+        or
+        max(/World Ping/icmpping[{$SA_TARGET}],#3)=0
+        or
+        max(/World Ping/icmpping[{$ZA_TARGET}],#3)=0
+        or
+        max(/World Ping/icmpping[{$AS_TARGET}],#3)=0
+      name: 'ICMP Ping: Unavailable by ICMP ping'
+      status: DISABLED
+      priority: HIGH
+      description: 'Last three attempts returned timeout. Please check device connectivity.'
+      type: MULTIPLE
+      tags:
+        - tag: scope
+          value: availability
+  graphs:
+    - uuid: 0ca9683210aa4c6eb9d8558a6920ddac
+      name: 'Internet Latency'
+      yaxismax: '0'
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$AS_TARGET}]'
+        - sortorder: '1'
+          color: '274482'
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$CEE_TARGET}]'
+        - sortorder: '2'
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$MENA_TARGET}]'
+        - sortorder: '3'
+          color: 2774A4
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$NA_TARGET}]'
+        - sortorder: '4'
+          color: A54F10
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$SA_TARGET}]'
+        - sortorder: '5'
+          color: FC6EA3
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$WEU_TARGET}]'
+        - sortorder: '6'
+          color: 6C59DC
+          calc_fnc: ALL
+          item:
+            host: 'World Ping'
+            key: 'icmppingsec[{$ZA_TARGET}]'
