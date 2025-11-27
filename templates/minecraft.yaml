@@ -1,0 +1,37 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: cc027d334c7e413a94c7b224ce201cc3
+      template: Minecraft
+      name: Minecraft
+      description: 'TCP check against Minecraft port'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 156b7cbc633d419ba56d33e77bbb8b4c
+          name: 'Minecraft Service'
+          key: 'net.tcp.port[{$MINECRAFT.HOST},{$MINECRAFT.PORT}]'
+          description: 'TCP check against the Minecraft port'
+          tags:
+            - tag: Application
+              value: Minecraft
+          triggers:
+            - uuid: 23840286c68a43bf8af381ddf774f896
+              expression: 'last(/Minecraft/net.tcp.port[{$MINECRAFT.HOST},{$MINECRAFT.PORT}],#1)=0'
+              name: 'Minecraft instance is DOWN'
+              priority: HIGH
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: minecraft
+      macros:
+        - macro: '{$MINECRAFT.HOST}'
+          value: '{HOST.HOST}'
+          description: 'FQDN/IP of the Minecraft server if different from the host'
+        - macro: '{$MINECRAFT.PORT}'
+          value: '25565'
+          description: 'TCP port of the Minecraft listener'
