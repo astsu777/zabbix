@@ -1,0 +1,141 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 87537698b58f4d8eaf89a86e62925e1f
+      template: 'External DNS'
+      name: 'External DNS'
+      description: 'Monitor external DNS response time'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 5af1aebcf4fd407eba244b73b8c10978
+          name: 'Cloudflare - DNS Performance'
+          key: 'net.dns.perf[1.1.1.1,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: 5b86c209bfeb420bbacb8b78194c5b39
+          name: 'Google - DNS Performance'
+          key: 'net.dns.perf[8.8.8.8,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: 4b77f8b950934e898a92b867405db519
+          name: 'Quad9 - DNS Performance'
+          key: 'net.dns.perf[9.9.9.9,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: 3c239da7e8c8474fb4a5b2917737d0b4
+          name: 'EuroDNS NS2 - DNS Performance'
+          key: 'net.dns.perf[104.37.178.107,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: 3f0c00e279344392aeb194fa4a53c808
+          name: 'EuroDNS NS4 - DNS Performance'
+          key: 'net.dns.perf[104.37.178.108,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: 2e5d05b10d6149e6829115586c13cf9d
+          name: 'EuroDNS NS1 - DNS Performance'
+          key: 'net.dns.perf[199.167.66.107,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: f0bf1b4ca94441f6bc50a56d6859f599
+          name: 'EuroDNS NS3 - DNS Performance'
+          key: 'net.dns.perf[199.167.66.108,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+        - uuid: 0a16565bdb254b9697fc82f466779282
+          name: 'Cisco Umbrella - DNS Performance'
+          key: 'net.dns.perf[208.67.222.222,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+          value_type: FLOAT
+          units: s
+          tags:
+            - tag: Application
+              value: DNS
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: dns
+      macros:
+        - macro: '{$EXT_DNS_RECORD}'
+          value: amazon.com
+          description: 'Value for of the DNS record to check (eg.: google.com)'
+        - macro: '{$EXT_DNS_RECORD_TYPE}'
+          value: A
+          description: 'Type of DNS record (A, PTR, MX, etc...)'
+  graphs:
+    - uuid: cafbfb62fb4a4b8d9f60670ba9c54b3c
+      name: 'External DNS Response Time'
+      yaxismax: '0'
+      graph_items:
+        - color: 1A7C11
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[208.67.222.222,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '1'
+          color: '274482'
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[1.1.1.1,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '2'
+          color: F63100
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[199.167.66.107,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '3'
+          color: 2774A4
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[104.37.178.107,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '4'
+          color: A54F10
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[199.167.66.108,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '5'
+          color: FC6EA3
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[104.37.178.108,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '6'
+          color: 6C59DC
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[8.8.8.8,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
+        - sortorder: '7'
+          color: AC8C14
+          calc_fnc: ALL
+          item:
+            host: 'External DNS'
+            key: 'net.dns.perf[9.9.9.9,{$EXT_DNS_RECORD},{$EXT_DNS_RECORD_TYPE}]'
