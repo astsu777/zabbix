@@ -10,9 +10,12 @@ zabbix_export:
       description: 'Send ICMP ping tests towards various servers in the world'
       readme: |
         ## Setup
-        
+
         Set `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`
-        
+
+      vendor:
+        name: astsu777
+        version: 1.0.0
       groups:
         - name: Templates
       items:
@@ -190,7 +193,7 @@ zabbix_export:
           key: 'icmpping[{$AS_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:
@@ -206,7 +209,7 @@ zabbix_export:
           key: 'icmpping[{$CEE_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:
@@ -222,7 +225,7 @@ zabbix_export:
           key: 'icmpping[{$MENA_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:
@@ -238,7 +241,7 @@ zabbix_export:
           key: 'icmpping[{$NA_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:
@@ -254,7 +257,7 @@ zabbix_export:
           key: 'icmpping[{$SA_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:
@@ -270,7 +273,7 @@ zabbix_export:
           key: 'icmpping[{$WEU_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:
@@ -286,7 +289,7 @@ zabbix_export:
           key: 'icmpping[{$ZA_TARGET}]'
           description: |
             The host accessibility by ICMP ping.
-            
+
             0 - ICMP ping fails;
             1 - ICMP ping successful.
           valuemap:

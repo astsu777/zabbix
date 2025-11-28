@@ -7,6 +7,9 @@ zabbix_export:
     - uuid: 65fb261aeb814551a08a67aa9d5ee991
       template: SSH
       name: SSH
+      vendor:
+        name: astsu777
+        version: 1.0.0
       description: 'TCP check against SMTP port'
       groups:
         - name: Templates

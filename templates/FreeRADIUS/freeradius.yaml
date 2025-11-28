@@ -9,20 +9,23 @@ zabbix_export:
       name: FreeRADIUS
       description: |
         ##Install
-        
+
         #####1. Enable status server in Freeradius
-        
+
         Enable status server functionality you need to set the following in radiusd.conf:
-        
+
         status_server = yes
-        
+
         FreeRADIUS will only respond to status-server messages, if the status-server virtual server has been enabled. To do this, create a link from the sites-enabled directory to the status file in the sites-available directory:
-        
+
         cd sites-enabled
         ln -s ../sites-available/status status
-        
+
         Restart/reload your RADIUS server. You will notice that a new server listens on port 18121/udp of localhost.
         If you want other clients than localhost to query this server, change the listen section of the new server. You should also change the default password in the client section of the site. Add more clients as needed.
+      vendor:
+        name: astsu777
+        version: 1.0.0
       groups:
         - name: Templates
       items:

@@ -8,6 +8,9 @@ zabbix_export:
       template: Syslog
       name: Syslog
       description: 'UDP check against the Syslog port'
+      vendor:
+        name: astsu777
+        version: 1.0.0
       groups:
         - name: Templates
       items:

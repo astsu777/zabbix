@@ -8,6 +8,9 @@ zabbix_export:
       template: SMTP
       name: SMTP
       description: 'TCP check against SMTP port'
+      vendor:
+        name: astsu777
+        version: 1.0.0
       groups:
         - name: Templates
       items:

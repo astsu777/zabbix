@@ -8,6 +8,9 @@ zabbix_export:
       template: 'External DNS'
       name: 'External DNS'
       description: 'Monitor external DNS response time'
+      vendor:
+        name: astsu777
+        version: 1.0.0
       groups:
         - name: Templates
       items:

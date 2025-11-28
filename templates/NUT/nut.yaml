@@ -9,10 +9,13 @@ zabbix_export:
       name: NUT
       description: |
         The primary goal of the Network UPS Tools (NUT) project is to provide support for Power Devices, such as Uninterruptible Power Supplies, Power Distribution Units, Automatic Transfer Switches, Power Supply Units and Solar Controllers. NUT provides a common protocol and set of tools to monitor and manage such devices, and to consistently name equivalent features and data points, across a vast range of vendor-specific protocols and connection media types.
-        
+
         NUT provides many control and monitoring features, with a uniform control and management interface. If you are just getting acquainted with NUT, that page also explains the technical design and some possible set-ups.
-        
+
         Source: https://networkupstools.org/
+      vendor:
+        name: astsu777
+        version: 1.0.0
       groups:
         - name: Templates
       items:

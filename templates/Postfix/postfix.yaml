@@ -1,18 +1,27 @@
 zabbix_export:
   version: '7.4'
   template_groups:
-    - uuid: 6e078d80fa084ed284ef6b18dc6e1c44
-      name: Templates/Magvice
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
   templates:
     - uuid: afc0409024224924b8d63743c4f58735
-      template: 'Magvice - Postfix'
-      name: 'Magvice - Postfix'
-      description: 'Template to monitor Postfix mailer by Zabbix agent'
+      template: Postfix
+      name: Postfix
+      description: |
+        This template monitors a Postfix instance's processes and queues using the Zabbix Agent, pflogsumm, logtail, postqueue and a helper script.
+        Monitored items are:
+
+        Number of different running Postfix processes
+        CPU and Memory usage of different Postfix processes
+        Postfix version
+        Number of messages in different queue's
+        Bounced, Deferred and Reject reasons
+        Mail volumes delivered/received in bytes
       vendor:
         name: astsu777
         version: 1.0.0
       groups:
-        - name: Templates/Magvice
+        - name: Templates
       items:
         - uuid: bd82dcd901404ebba19b4d61c93c2d40
           name: 'Postfix: Volume delivered'
@@ -175,7 +184,7 @@ zabbix_export:
               value: 'mail statistics'
           triggers:
             - uuid: ddb9aa399bc241a6b7a2a366571ae73a
-              expression: 'sum(/Magvice - Postfix/postfix.mail.bounced,{$POSTFIX.TRIGGER.PERIOD:"bounced"})>{$POSTFIX.BOUNCED.MAX}'
+              expression: 'sum(/Postfix/postfix.mail.bounced,{$POSTFIX.TRIGGER.PERIOD:"bounced"})>{$POSTFIX.BOUNCED.MAX}'
               name: 'Postfix: High number of bounced mails'
               event_name: 'Postfix: High number of bounced mails (> {$POSTFIX.BOUNCED.MAX} in {$POSTFIX.TRIGGER.PERIOD:"bounced"})'
               opdata: 'Bounced mails last {$POSTFIX.TRIGGER.PERIOD:"bounced"}: {?sum(/Postfix by Zabbix agent/postfix.mail.bounced,{$POSTFIX.TRIGGER.PERIOD:"bounced"})}'
@@ -446,7 +455,7 @@ zabbix_export:
               value: 'mail statistics'
           triggers:
             - uuid: 873095eff9524602aba56302149776a8
-              expression: 'sum(/Magvice - Postfix/postfix.mail.rejected,{$POSTFIX.TRIGGER.PERIOD:"rejected"})>{$POSTFIX.REJECT.MAX}'
+              expression: 'sum(/Postfix/postfix.mail.rejected,{$POSTFIX.TRIGGER.PERIOD:"rejected"})>{$POSTFIX.REJECT.MAX}'
               name: 'Postfix: High number of rejected mails'
               event_name: 'Postfix: High number of rejected mails (> {$POSTFIX.REJECTED.MAX} in {$POSTFIX.TRIGGER.PERIOD:"rejected"})'
               opdata: 'Bounced mails last {$POSTFIX.TRIGGER.PERIOD:"rejected"}: {?sum(/Postfix by Zabbix agent/postfix.mail.rejected,{$POSTFIX.TRIGGER.PERIOD:"rejected"})}'
@@ -689,7 +698,7 @@ zabbix_export:
               value: queue
           triggers:
             - uuid: c6472595491946cb8cb93a23d52647d2
-              expression: 'min(/Magvice - Postfix/postfix.queue.active,5m)>{$POSTFIX.ACTIVE.MAX}'
+              expression: 'min(/Postfix/postfix.queue.active,5m)>{$POSTFIX.ACTIVE.MAX}'
               name: 'Postfix: High number of mails in active queue'
               event_name: 'Postfix: High number of mails in active queue for more than 5m (> {$POSTFIX.ACTIVE.MAX})'
               opdata: 'Mails in queue: {ITEM.LASTVALUE}'
@@ -720,7 +729,7 @@ zabbix_export:
               value: queue
           triggers:
             - uuid: db89266a109940a48586e6d0f11e4722
-              expression: 'last(/Magvice - Postfix/postfix.queue.corrupt)>0'
+              expression: last(/Postfix/postfix.queue.corrupt)>0
               name: 'Postfix: One or more corrupt message files in queue'
               opdata: 'Corrupt mails in queue: {ITEM.LASTVALUE}'
               priority: AVERAGE
@@ -748,7 +757,7 @@ zabbix_export:
               value: queue
           triggers:
             - uuid: e56d6491740646d9a4fb614f3e10a3fc
-              expression: 'min(/Magvice - Postfix/postfix.queue.deferred,5m)>{$POSTFIX.DEFERRED.MAX}'
+              expression: 'min(/Postfix/postfix.queue.deferred,5m)>{$POSTFIX.DEFERRED.MAX}'
               name: 'Postfix: High number of deferred mails'
               event_name: 'Postfix: High number of deferred mails for more than 5m (> {$POSTFIX.DEFERRED.MAX})'
               opdata: 'Deferred mails in queue: {ITEM.LASTVALUE}'
@@ -1092,7 +1101,7 @@ zabbix_export:
               value: queue
           triggers:
             - uuid: 6e6a34e6faf340c2a66f591a0a8abfad
-              expression: 'min(/Magvice - Postfix/postfix.queue.hold,5m)>{$POSTFIX.HOLD.MAX}'
+              expression: 'min(/Postfix/postfix.queue.hold,5m)>{$POSTFIX.HOLD.MAX}'
               name: 'Postfix: High number of held mails'
               event_name: 'Postfix: High number of held mails for more than 5m (> {$POSTFIX.HOLD.MAX})'
               opdata: 'Held mails in queue: {ITEM.LASTVALUE}'
@@ -1207,7 +1216,7 @@ zabbix_export:
               value: application
           triggers:
             - uuid: d25be10e36694febb10fb5d19634520a
-              expression: 'last(/Magvice - Postfix/postfix.version,#1)<>last(/Magvice - Postfix/postfix.version,#2) and length(last(/Magvice - Postfix/postfix.version))>0'
+              expression: 'last(/Postfix/postfix.version,#1)<>last(/Postfix/postfix.version,#2) and length(last(/Postfix/postfix.version))>0'
               name: 'Postfix: Version has changed'
               event_name: 'Postfix: Version has changed (new version: {ITEM.VALUE})'
               priority: INFO
@@ -1665,13 +1674,13 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 54dff335e1774453a82275168b4acd11
-              expression: 'max(/Magvice - Postfix/proc.num[,{$POSTFIX_USER}],5m)=0'
+              expression: 'max(/Postfix/proc.num[,{$POSTFIX_USER}],5m)=0'
               name: 'Postfix: Services down'
               priority: HIGH
               description: 'Postfix worker services are not running.'
               dependencies:
                 - name: 'Postfix: Master process is not running'
-                  expression: 'max(/Magvice - Postfix/proc.num[master,root],5m)=0'
+                  expression: 'max(/Postfix/proc.num[master,root],5m)=0'
               tags:
                 - tag: scope
                   value: availability
@@ -1744,7 +1753,7 @@ zabbix_export:
               value: system
           triggers:
             - uuid: 92152cfd60fb42d6a5bb60399c26e0b4
-              expression: 'max(/Magvice - Postfix/proc.num[master,root],5m)=0'
+              expression: 'max(/Postfix/proc.num[master,root],5m)=0'
               name: 'Postfix: Master process is not running'
               priority: HIGH
               tags:
@@ -1898,7 +1907,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.version
                     - type: INTEGER
                       name: show
@@ -1914,7 +1923,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: General Mail Stats'
                     - type: STRING
                       name: reference
@@ -1927,7 +1936,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: Processes'
                     - type: STRING
                       name: reference
@@ -1950,7 +1959,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: 'proc.num[master,root]'
                     - type: STRING
                       name: thresholds.0.color
@@ -1988,7 +1997,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: 'proc.num[,{$POSTFIX_USER}]'
                     - type: STRING
                       name: thresholds.0.color
@@ -2032,7 +2041,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: 'proc.cpu.util[,{$POSTFIX_USER}]'
                     - type: STRING
                       name: thresholds.0.color
@@ -2067,7 +2076,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: Mail in Queue'
                     - type: STRING
                       name: reference
@@ -2081,7 +2090,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: Mail Throughput Bytes'
                     - type: STRING
                       name: reference
@@ -2095,7 +2104,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: CPU utilization'
                     - type: STRING
                       name: reference
@@ -2118,7 +2127,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: 'proc.mem[,{$POSTFIX_USER}]'
                     - type: STRING
                       name: up_color
@@ -2144,7 +2153,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.queue.incoming
                     - type: INTEGER
                       name: units_bold
@@ -2173,7 +2182,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.queue.maildrop
                     - type: INTEGER
                       name: units_bold
@@ -2190,7 +2199,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: Mail Troughput Detail Pie'
                     - type: STRING
                       name: reference
@@ -2213,7 +2222,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.queue.active
                     - type: STRING
                       name: thresholds.0.color
@@ -2248,7 +2257,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: Memory usage'
                     - type: STRING
                       name: reference
@@ -2271,7 +2280,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.queue.deferred
                     - type: STRING
                       name: thresholds.0.color
@@ -2307,7 +2316,7 @@ zabbix_export:
                     - type: GRAPH
                       name: graphid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         name: 'Postfix: Mail Deferred Detail Pie'
                     - type: STRING
                       name: reference
@@ -2330,7 +2339,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.queue.hold
                     - type: STRING
                       name: thresholds.0.color
@@ -2374,7 +2383,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid
                       value:
-                        host: 'Magvice - Postfix'
+                        host: Postfix
                         key: postfix.queue.corrupt
                     - type: STRING
                       name: thresholds.0.color
@@ -2401,82 +2410,82 @@ zabbix_export:
       graph_items:
         - color: 1A7C11
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[anvil,{$POSTFIX_USER}]'
         - sortorder: '1'
           color: '274482'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[bounce,{$POSTFIX_USER}]'
         - sortorder: '2'
           color: F63100
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[cleanup,{$POSTFIX_USER}]'
         - sortorder: '3'
           color: 2774A4
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[flush,{$POSTFIX_USER}]'
         - sortorder: '4'
           color: A54F10
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[local,{$POSTFIX_USER}]'
         - sortorder: '5'
           color: FC6EA3
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[master,root]'
         - sortorder: '6'
           color: 6C59DC
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[pickup,{$POSTFIX_USER}]'
         - sortorder: '7'
           color: AC8C14
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[qmgr,{$POSTFIX_USER}]'
         - sortorder: '8'
           color: 611F27
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[scache,{$POSTFIX_USER}]'
         - sortorder: '9'
           color: F230E0
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[showq,{$POSTFIX_USER}]'
         - sortorder: '10'
           color: 5CCD18
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[smtpd,{$POSTFIX_USER}]'
         - sortorder: '11'
           color: BB2A02
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[smtp,{$POSTFIX_USER}]'
         - sortorder: '12'
           color: 5A2B57
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[tlsmgr,{$POSTFIX_USER}]'
         - sortorder: '13'
           color: 89ABF8
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[trivial-rewrite,{$POSTFIX_USER}]'
         - sortorder: '14'
           color: 7EC25C
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[verify,{$POSTFIX_USER}]'
         - sortorder: '15'
           color: 2B5429
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.cpu.util[virtual,{$POSTFIX_USER}]'
     - uuid: 8b31c27551f847a3934ca0112823ab67
       name: 'Postfix: General Mail Stats'
@@ -2484,52 +2493,52 @@ zabbix_export:
       graph_items:
         - color: 1A7C11
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.active
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced
         - sortorder: '2'
           color: BF00FF
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.corrupt
         - sortorder: '3'
           color: FFBF00
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred
         - sortorder: '4'
           color: '891515'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.hold
         - sortorder: '5'
           color: CC6600
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.incoming
         - sortorder: '6'
           color: 4DB6AC
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.maildrop
         - sortorder: '7'
           color: C62828
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected
         - sortorder: '8'
           color: 00FF00
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.delivered
         - sortorder: '9'
           color: F48FB1
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.discarded
     - uuid: 38a285a5ad9247c9a2e35081a2c0f4b8
       name: 'Postfix: Mail Deferred Detail Pie'
@@ -2541,95 +2550,95 @@ zabbix_export:
       graph_items:
         - color: 8F2809
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_tlsfailed
         - sortorder: '1'
           color: BF360C
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_crefused
         - sortorder: '2'
           color: E64A19
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_ctimeout
         - sortorder: '3'
           color: FF5722
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_err450
         - sortorder: '4'
           color: EF6C00
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_err451
         - sortorder: '5'
           color: FB8C00
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_err421
         - sortorder: '6'
           color: FFA726
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_err452
         - sortorder: '7'
           color: FFB74D
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_nohost
         - sortorder: '8'
           color: FBC02D
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_ipblocked
         - sortorder: '9'
           color: FFD54F
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_lostc
         - sortorder: '10'
           color: FFEB3B
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_msrefused
         - sortorder: '11'
           color: FFF176
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_noroute
         - sortorder: '12'
           color: FFF59D
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_rtimeout
         - sortorder: '13'
           color: FFECB3
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_err454
         - sortorder: '14'
           color: FFE0B2
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.deferred_err4
         - sortorder: '15'
           color: 2E7D32
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.delivered
     - uuid: 5fa10f5e45444ddc99afc7b88d06539d
       name: 'Postfix: Mail in Queue'
       graph_items:
         - color: 1A7C11
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.size
         - sortorder: '1'
           color: FF0000
           yaxisside: RIGHT
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.queue.total
     - uuid: 1d7b082e598c4693848b1fe4d1f68a0a
       name: 'Postfix: Mail Throughput'
@@ -2637,29 +2646,29 @@ zabbix_export:
       graph_items:
         - color: FF8000
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected
         - sortorder: '2'
           color: 388E3C
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.delivered
     - uuid: e3570a36dd6145d78a6fcc4b3f85e4d0
       name: 'Postfix: Mail Throughput Bytes'
       graph_items:
         - color: 1A7C11
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.bytes_delivered
         - sortorder: '1'
           color: '274482'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.bytes_received
     - uuid: 9e813a51a10c48c5843436d8c40c50f2
       name: 'Postfix: Mail Troughput Detail Pie'
@@ -2671,68 +2680,68 @@ zabbix_export:
       graph_items:
         - color: '795548'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_554error
         - sortorder: '1'
           color: BF360C
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_550invalid
         - sortorder: '2'
           color: F4511E
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_553nonascii
         - sortorder: '3'
           color: F57C00
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_nullmx
         - sortorder: '4'
           color: FF9800
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_552toobig
         - sortorder: '5'
           color: FDD835
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_551noauth
         - sortorder: '6'
           color: FFEB3B
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.bounced_other
         - sortorder: '7'
           color: 6A1B9A
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected_550nouser
         - sortorder: '8'
           color: 8E24AA
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected_454norelay
         - sortorder: '9'
           color: AB47BC
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected_554senderdenied
         - sortorder: '10'
           color: BA68C8
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected_553sendernotuser
         - sortorder: '11'
           color: E1BEE7
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.rejected_other
         - sortorder: '12'
           color: 2E7D32
           type: GRAPH_SUM
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: postfix.mail.received
     - uuid: 15a9c2cf135b4f2baf66c84bb87b7529
       name: 'Postfix: Memory usage'
@@ -2740,82 +2749,82 @@ zabbix_export:
       graph_items:
         - color: 1A7C11
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[anvil,{$POSTFIX_USER}]'
         - sortorder: '1'
           color: '274482'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[bounce,{$POSTFIX_USER}]'
         - sortorder: '2'
           color: F63100
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[cleanup,{$POSTFIX_USER}]'
         - sortorder: '3'
           color: 2774A4
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[flush,{$POSTFIX_USER}]'
         - sortorder: '4'
           color: A54F10
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[local,{$POSTFIX_USER}]'
         - sortorder: '5'
           color: 6C59DC
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[pickup,{$POSTFIX_USER}]'
         - sortorder: '6'
           color: AC8C14
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[qmgr,{$POSTFIX_USER}]'
         - sortorder: '7'
           color: 611F27
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[scache,{$POSTFIX_USER}]'
         - sortorder: '8'
           color: F230E0
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[showq,{$POSTFIX_USER}]'
         - sortorder: '9'
           color: 5CCD18
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[smtpd,{$POSTFIX_USER}]'
         - sortorder: '10'
           color: BB2A02
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[smtp,{$POSTFIX_USER}]'
         - sortorder: '11'
           color: 5A2B57
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[tlsmgr,{$POSTFIX_USER}]'
         - sortorder: '12'
           color: 89ABF8
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[trivial-rewrite,{$POSTFIX_USER}]'
         - sortorder: '13'
           color: 7EC25C
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[verify,{$POSTFIX_USER}]'
         - sortorder: '14'
           color: 2B5429
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[virtual,{$POSTFIX_USER}]'
         - sortorder: '15'
           color: FC6EA3
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[master,root]'
     - uuid: 42b7c8e1c5d643ce8aba1e0c3a70e601
       name: 'Postfix: Processes'
@@ -2823,77 +2832,77 @@ zabbix_export:
       graph_items:
         - color: '274482'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[anvil,{$POSTFIX_USER}]'
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[bounce,{$POSTFIX_USER}]'
         - sortorder: '2'
           color: 2774A4
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[cleanup,{$POSTFIX_USER}]'
         - sortorder: '3'
           color: A54F10
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[flush,{$POSTFIX_USER}]'
         - sortorder: '4'
           color: FC6EA3
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[local,{$POSTFIX_USER}]'
         - sortorder: '5'
           color: 6C59DC
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[pickup,{$POSTFIX_USER}]'
         - sortorder: '6'
           color: AC8C14
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[qmgr,{$POSTFIX_USER}]'
         - sortorder: '7'
           color: 611F27
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[scache,{$POSTFIX_USER}]'
         - sortorder: '8'
           color: F230E0
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[showq,{$POSTFIX_USER}]'
         - sortorder: '9'
           color: 5CCD18
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[smtpd,{$POSTFIX_USER}]'
         - sortorder: '10'
           color: BB2A02
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[smtp,{$POSTFIX_USER}]'
         - sortorder: '11'
           color: 5A2B57
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[trivial-rewrite,{$POSTFIX_USER}]'
         - sortorder: '12'
           color: 89ABF8
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[verify,{$POSTFIX_USER}]'
         - sortorder: '13'
           color: 7EC25C
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[virtual,{$POSTFIX_USER}]'
         - sortorder: '14'
           color: 1A7C11
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[master,root]'
     - uuid: 45656cf77f3b43bba9f909e3d1d24caa
       name: 'Postfix: Processes and Memory'
@@ -2902,15 +2911,15 @@ zabbix_export:
           color: 1A7C11
           yaxisside: RIGHT
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.mem[,{$POSTFIX_USER}]'
         - sortorder: '1'
           color: F63100
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[,{$POSTFIX_USER}]'
         - sortorder: '2'
           color: '274482'
           item:
-            host: 'Magvice - Postfix'
+            host: Postfix
             key: 'proc.num[master,root]'
