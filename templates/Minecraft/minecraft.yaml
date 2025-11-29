@@ -7,10 +7,10 @@ zabbix_export:
     - uuid: cc027d334c7e413a94c7b224ce201cc3
       template: Minecraft
       name: Minecraft
-      description: 'TCP check against Minecraft port'
+      description: 'TCP check against Minecraft ports'
       vendor:
         name: astsu777
-        version: 1.0.0
+        version: 1.0.1
       groups:
         - name: Templates
       items:
@@ -26,6 +26,18 @@ zabbix_export:
               expression: 'last(/Minecraft/net.tcp.port[{$MINECRAFT.HOST},{$MINECRAFT.PORT}],#1)=0'
               name: 'Minecraft instance is DOWN'
               priority: HIGH
+        - uuid: e27820d83c834dd690820ae953d72103
+          name: 'Minecraft SFTP Service'
+          key: 'net.tcp.port[{$MINECRAFT.HOST},{$MINECRAFT.SFTP.PORT}]'
+          description: 'TCP check against the Minecraft SFTP port'
+          tags:
+            - tag: Application
+              value: Minecraft
+          triggers:
+            - uuid: 14abf4ea1cf547dbbdbb3b3c18b4a762
+              expression: 'last(/Minecraft/net.tcp.port[{$MINECRAFT.HOST},{$MINECRAFT.SFTP.PORT}],#1)=0'
+              name: 'Minecraft SFTP server is DOWN'
+              priority: AVERAGE
       tags:
         - tag: class
           value: software
@@ -38,3 +50,6 @@ zabbix_export:
         - macro: '{$MINECRAFT.PORT}'
           value: '25565'
           description: 'TCP port of the Minecraft listener'
+        - macro: '{$MINECRAFT.SFTP.PORT}'
+          value: '2224'
+          description: 'TCP port of the Minecraft instance SFTP listener'
