@@ -1,0 +1,39 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: c785557771064ed184104ffea8fe5ae7
+      template: RDP
+      name: RDP
+      description: 'TCP check against RDP port'
+      vendor:
+        name: astsu777
+        version: 1.0.0
+      groups:
+        - name: Templates
+      items:
+        - uuid: 66cde6eeeb8644e2b51f9417644f5648
+          name: 'RDP Listener'
+          key: 'net.tcp.listen[{$RDP.PORT}]'
+          description: 'TCP check against the SSH port'
+          tags:
+            - tag: Application
+              value: RDP
+          triggers:
+            - uuid: a42dcb8aee7d4747ab3d1c359e7d346f
+              expression: 'last(/RDP/net.tcp.listen[{$RDP.PORT}],#1)<>1'
+              name: 'RDP service not listening'
+              event_name: 'SSH service not listening: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'The TCP connection could not be established'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: rdp
+      macros:
+        - macro: '{$RDP.PORT}'
+          value: '3389'
+          description: 'TCP port of the RDP listener'
