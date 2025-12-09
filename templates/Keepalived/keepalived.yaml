@@ -1,0 +1,86 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: e5bfeb1eb37947d59b604fa2d443a22f
+      template: Keepalived
+      name: Keepalived
+      description: |
+        The Keepalived VRRP instance notifies the script when a change happens.
+        The script writes the status of the VRRP instance into a temporary file. The Zabbix agent then reads the content of the file with vfs.file.regmatch and reports it to the Zabbix server.
+
+        ## Usage
+        1. Copy the Script to the keepalived Node into ```/usr/local/bin/keepalived_notify.sh```
+
+
+        2. Make it executable and owned by root
+            ```
+            chmod 751 /usr/local/bin/keepalived_notify.sh
+            chown root:root /usr/local/bin/keepalived_notify.sh
+            ```
+
+        3. Add the notify Parameter to the Keepalived config
+            ```
+            vrrp_instance VRRP_1 {
+                [...]
+                notify "/usr/local/bin/keepalived_notify.sh"
+            }
+            ```
+      vendor:
+        name: astsu777
+        version: 1.0.0
+      groups:
+        - name: Templates
+      items:
+        - uuid: 4fc6bf205776409aa97ddc272c1299f1
+          name: 'Keepalived: process count'
+          key: 'proc.num[keepalived]'
+          delay: 2m
+          history: 90d
+          description: 'Check the number of keepalived processes'
+          tags:
+            - tag: Application
+              value: Keepalived
+        - uuid: 18120f9521a842f39bbf3eab57e589e7
+          name: 'Keepalived: is BACKUP'
+          key: 'vfs.file.regmatch[/var/run/keepalived_status,^.*(BACKUP)]'
+          delay: 2m
+          history: 90d
+          description: 'Check if the node is BACKUP'
+          tags:
+            - tag: Application
+              value: Keepalived
+        - uuid: 0fa405529ce14abab555a5fb9db7cea2
+          name: 'Keepalived: is MASTER'
+          key: 'vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)]'
+          delay: 2m
+          history: 90d
+          description: 'Check if the node is MASTER'
+          tags:
+            - tag: Application
+              value: Keepalived
+          triggers:
+            - uuid: ef2f09ba52324e25ba834b4c8c38a1d5
+              expression: 'last(/Keepalived/vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)],#2)=0 and last(/Keepalived/vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)])=1'
+              name: 'Keepalived: state change from BACKUP to MASTER'
+              priority: AVERAGE
+            - uuid: 3281bc553a694e16bbffc2a1217abe03
+              expression: 'last(/Keepalived/vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)],#2)=1 and last(/Keepalived/vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)])=0'
+              name: 'Keepalived: state change from MASTER to BACKUP'
+              priority: AVERAGE
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: keepalived
+  triggers:
+    - uuid: 8bba2b7b7eac4811bb8472cf97165c71
+      expression: 'last(/Keepalived/vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)])=0 and last(/Keepalived/proc.num[keepalived])<2'
+      name: 'Keepalived: state is BACKUP but it''s stopped'
+      priority: HIGH
+    - uuid: d99f0bc206bc4f17acdb1d5efe2679d5
+      expression: 'last(/Keepalived/vfs.file.regmatch[/var/run/keepalived_status,^.*(MASTER)])=1 and last(/Keepalived/proc.num[keepalived])<2'
+      name: 'Keepalived: state is MASTER but it''s stopped'
+      priority: DISASTER
