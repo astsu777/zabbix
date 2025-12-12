@@ -1,26 +1,26 @@
 zabbix_export:
   version: '7.4'
   template_groups:
-    - uuid: 7df96b18c230490a9a0a9e2307226338
-      name: Templates
+    - uuid: b500b0fabc5e481f9451748651328ab7
+      name: Templates/Magvice/Custom
   templates:
     - uuid: aac4dab1ac7e4c33b93991cacf535f14
-      template: 'Cloud Down Detector'
-      name: 'Cloud Down Detector'
+      template: 'Magvice - Cloud Down Detector'
+      name: 'Magvice - Cloud Down Detector'
       description: |
         Check the status of major cloud services.
-
+        
         When possible, an API call is made against the status page of the host.
         Worst case scenario, a Web scenario to check if the status page is UP is made.
+      readme: |
+        ## Setup
+        
+        Set `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`
       vendor:
         name: astsu777
         version: 1.0.0
-      readme: |
-        ## Setup
-
-        Set `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`
       groups:
-        - name: Templates
+        - name: Templates/Magvice/Custom
       items:
         - uuid: c8398954df9d40c59b9637a45bf16333
           name: 'Akamai Status'
@@ -39,7 +39,7 @@ zabbix_export:
               value: Akamai
           triggers:
             - uuid: 44f1caa59c5b403a97ce9d0e2d479ed6
-              expression: 'last(/Cloud Down Detector/http_status_get_akamai)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_akamai)="major_outage"'
               name: 'Major Incident at Provider: Akamai'
               priority: DISASTER
               description: |
@@ -80,7 +80,7 @@ zabbix_export:
               value: Microsoft
           triggers:
             - uuid: 79779b2927ec48889debe08e7c89abcf
-              expression: 'last(/Cloud Down Detector/http_status_get_azure)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_azure)="major_outage"'
               name: 'Major Incident at Provider: Microsoft Azure'
               priority: DISASTER
               description: |
@@ -106,7 +106,7 @@ zabbix_export:
               value: Cloudflare
           triggers:
             - uuid: e1a142fd7d234176b701d27890bbf12b
-              expression: 'last(/Cloud Down Detector/http_status_get_cloudflare)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_cloudflare)="major_outage"'
               name: 'Major Incident at Provider: Cloudflare'
               priority: DISASTER
               description: |
@@ -147,7 +147,7 @@ zabbix_export:
               value: Codabox
           triggers:
             - uuid: 4a0666e09f7d4c1f886fe8c3d0613c90
-              expression: 'last(/Cloud Down Detector/http_status_get_codabox)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_codabox)="major_outage"'
               name: 'Major Incident at Provider: Codabox'
               priority: HIGH
               description: |
@@ -188,7 +188,7 @@ zabbix_export:
               value: Github
           triggers:
             - uuid: 3800e5524b4c4d63aa8e88c866159225
-              expression: 'last(/Cloud Down Detector/http_status_get_github)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_github)="major_outage"'
               name: 'Major Incident at Provider: Github'
               priority: AVERAGE
               description: |
@@ -229,7 +229,7 @@ zabbix_export:
               value: Microsoft
           triggers:
             - uuid: a633d1c97b634cffad0787ec7d283cc9
-              expression: 'last(/Cloud Down Detector/http_status_get_m365consumer)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_m365consumer)="major_outage"'
               name: 'Major Incident at Provider: Microsoft 365 (Consumers)'
               priority: HIGH
               description: |
@@ -255,7 +255,7 @@ zabbix_export:
               value: Ookla
           triggers:
             - uuid: 594f43a70e0e4f1c85672082a56a37f5
-              expression: 'last(/Cloud Down Detector/http_status_get_ookla)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_ookla)="major_outage"'
               name: 'Major Incident at Provider: Ookla'
               priority: WARNING
               description: |
@@ -356,7 +356,7 @@ zabbix_export:
               value: Microsoft
           triggers:
             - uuid: 99ffd1ca46d84e33a2db62c20dd45523
-              expression: 'last(/Cloud Down Detector/http_status_get_ppac)="major_outage"'
+              expression: 'last(/Magvice - Cloud Down Detector/http_status_get_ppac)="major_outage"'
               name: 'Major Incident at Provider: Microsoft Power Platform'
               priority: WARNING
               description: |
@@ -508,7 +508,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_akamaidesc
                     - type: INTEGER
                       name: show.0
@@ -537,7 +537,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_ookladesc
                     - type: INTEGER
                       name: show.0
@@ -566,7 +566,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_azure
                     - type: INTEGER
                       name: show.0
@@ -595,7 +595,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_m365consumer
                     - type: INTEGER
                       name: show.0
@@ -624,7 +624,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_cloudflaredesc
                     - type: INTEGER
                       name: show.0
@@ -926,7 +926,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_codaboxdesc
                     - type: INTEGER
                       name: show.0
@@ -995,7 +995,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_githubdesc
                     - type: INTEGER
                       name: show.0
@@ -1025,7 +1025,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_ovh_bmcdesc
                     - type: INTEGER
                       name: show.0
@@ -1055,7 +1055,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_ovh_infradesc
                     - type: INTEGER
                       name: show.0
@@ -1085,7 +1085,7 @@ zabbix_export:
                     - type: ITEM
                       name: itemid.0
                       value:
-                        host: 'Cloud Down Detector'
+                        host: 'Magvice - Cloud Down Detector'
                         key: http_status_get_ppac
                     - type: INTEGER
                       name: show.0
@@ -1102,45 +1102,23 @@ zabbix_export:
                     - type: INTEGER
                       name: value_size
                       value: '30'
-      valuemaps:
-        - uuid: b81ebc2dce0f46698520fcfdd907c768
-          name: 'Service state'
-          mappings:
-            - value: none
-              newvalue: Up
-            - value: up
-              newvalue: Up
-            - value: degraded_performance
-              newvalue: Degraded
-            - value: partial_outage
-              newvalue: Degraded
-            - value: minor
-              newvalue: Degraded
-            - value: major_outage
-              newvalue: Down
-            - value: maintenance
-              newvalue: Maintenance
-            - value: Available
-              newvalue: Up
-            - value: Operational
-              newvalue: Up
   triggers:
     - uuid: 5bbd6b5270e946ce81093df3b03c6e92
-      expression: 'last(/Cloud Down Detector/web.test.fail[AWS])>0'
+      expression: 'last(/Magvice - Cloud Down Detector/web.test.fail[AWS])>0'
       name: 'AWS Status Page is DOWN'
       priority: DISASTER
       tags:
         - tag: scope
           value: availability
     - uuid: a42e29bf944044078e10ba41f92acc02
-      expression: 'last(/Cloud Down Detector/web.test.fail[Google Cloud])>0'
+      expression: 'last(/Magvice - Cloud Down Detector/web.test.fail[Google Cloud])>0'
       name: 'Google Cloud Status Page is DOWN'
       priority: DISASTER
       tags:
         - tag: scope
           value: availability
     - uuid: 04aeba78d3b24447bbe9ad8caf95578e
-      expression: 'last(/Cloud Down Detector/web.test.fail[Google Workspace])>0'
+      expression: 'last(/Magvice - Cloud Down Detector/web.test.fail[Google Workspace])>0'
       name: 'Google Workspace Status Page is DOWN'
       priority: DISASTER
       tags:
@@ -1148,11 +1126,11 @@ zabbix_export:
           value: availability
     - uuid: 13bcb51e3b0a4b51ac8b04dec7c8b2c1
       expression: |
-        last(/Cloud Down Detector/http_status_get_ovh_bmc)="major_outage"
-
+        last(/Magvice - Cloud Down Detector/http_status_get_ovh_bmc)="major_outage"
+        
         or
-
-        last(/Cloud Down Detector/http_status_get_ovh_infra)="major_outage"
+        
+        last(/Magvice - Cloud Down Detector/http_status_get_ovh_infra)="major_outage"
       name: 'Major Incident at Provider: OVH'
       priority: HIGH
       description: |
