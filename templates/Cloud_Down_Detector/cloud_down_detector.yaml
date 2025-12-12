@@ -1,0 +1,1164 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: aac4dab1ac7e4c33b93991cacf535f14
+      template: 'Cloud Down Detector'
+      name: 'Cloud Down Detector'
+      description: |
+        Check the status of major cloud services.
+
+        When possible, an API call is made against the status page of the host.
+        Worst case scenario, a Web scenario to check if the status page is UP is made.
+      vendor:
+        name: astsu777
+        version: 1.0.0
+      readme: |
+        ## Setup
+
+        Set `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`
+      groups:
+        - name: Templates
+      items:
+        - uuid: c8398954df9d40c59b9637a45bf16333
+          name: 'Akamai Status'
+          type: HTTP_AGENT
+          key: http_status_get_akamai
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://www.akamaistatus.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Akamai
+          triggers:
+            - uuid: 44f1caa59c5b403a97ce9d0e2d479ed6
+              expression: 'last(/Cloud Down Detector/http_status_get_akamai)="major_outage"'
+              name: 'Major Incident at Provider: Akamai'
+              priority: DISASTER
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://www.akamaistatus.com
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 26c9168d3f1442dd9d54599edc477c14
+          name: 'Akamai Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_akamaidesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://www.akamaistatus.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Akamai
+        - uuid: 93faa89fbf624605a3b73120cc4ee387
+          name: 'Microsoft Azure Status'
+          type: HTTP_AGENT
+          key: http_status_get_azure
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.Status
+          url: 'https://status.cloud.microsoft/api/posts/azure'
+          tags:
+            - tag: provider
+              value: Microsoft
+          triggers:
+            - uuid: 79779b2927ec48889debe08e7c89abcf
+              expression: 'last(/Cloud Down Detector/http_status_get_azure)="major_outage"'
+              name: 'Major Incident at Provider: Microsoft Azure'
+              priority: DISASTER
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://status.cloud.microsoft
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: f20caa9297d441f3a81cf3bd5edc27e8
+          name: 'Cloudflare Status'
+          type: HTTP_AGENT
+          key: http_status_get_cloudflare
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://www.cloudflarestatus.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Cloudflare
+          triggers:
+            - uuid: e1a142fd7d234176b701d27890bbf12b
+              expression: 'last(/Cloud Down Detector/http_status_get_cloudflare)="major_outage"'
+              name: 'Major Incident at Provider: Cloudflare'
+              priority: DISASTER
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://www.cloudflarestatus.com
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 49a33885d9be4df0bd4a44c8b2261088
+          name: 'Cloudflare Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_cloudflaredesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://www.cloudflarestatus.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Cloudflare
+        - uuid: 8e82521862264190a1d20f8c98134c47
+          name: 'Codabox Status'
+          type: HTTP_AGENT
+          key: http_status_get_codabox
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://status.codabox.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Codabox
+          triggers:
+            - uuid: 4a0666e09f7d4c1f886fe8c3d0613c90
+              expression: 'last(/Cloud Down Detector/http_status_get_codabox)="major_outage"'
+              name: 'Major Incident at Provider: Codabox'
+              priority: HIGH
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://status.codabox.com
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: ddc86ab538eb4e3e848b7e464d7da530
+          name: 'Codabox Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_codaboxdesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://status.codabox.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Codabox
+        - uuid: 65da8713cb244fcdb2060222b9ae3db3
+          name: 'Github Status'
+          type: HTTP_AGENT
+          key: http_status_get_github
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://www.githubstatus.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Github
+          triggers:
+            - uuid: 3800e5524b4c4d63aa8e88c866159225
+              expression: 'last(/Cloud Down Detector/http_status_get_github)="major_outage"'
+              name: 'Major Incident at Provider: Github'
+              priority: AVERAGE
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://www.githubstatus.com
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: e325d68e41ec40e8be278c32b702c83d
+          name: 'Github Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_githubdesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://www.githubstatus.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Github
+        - uuid: 3487af421a8f4517baae012e62339bef
+          name: 'Microsoft M365 Consumer Status'
+          type: HTTP_AGENT
+          key: http_status_get_m365consumer
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$[0].Status'
+          url: 'https://status.cloud.microsoft/api/posts/m365Consumer'
+          tags:
+            - tag: provider
+              value: Microsoft
+          triggers:
+            - uuid: a633d1c97b634cffad0787ec7d283cc9
+              expression: 'last(/Cloud Down Detector/http_status_get_m365consumer)="major_outage"'
+              name: 'Major Incident at Provider: Microsoft 365 (Consumers)'
+              priority: HIGH
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://status.cloud.microsoft
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: d923d819abb84346bdcfe5f60c4d8ec3
+          name: 'Ookla Status'
+          type: HTTP_AGENT
+          key: http_status_get_ookla
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://status.ookla.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Ookla
+          triggers:
+            - uuid: 594f43a70e0e4f1c85672082a56a37f5
+              expression: 'last(/Cloud Down Detector/http_status_get_ookla)="major_outage"'
+              name: 'Major Incident at Provider: Ookla'
+              priority: WARNING
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://status.ookla.com
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: ea7a612b3b2f4c0fa372ea9acb761958
+          name: 'Ookla Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_ookladesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://status.ookla.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: Ookla
+        - uuid: 22d497c41b564933899eb06910f4af2b
+          name: 'OVH Bare Metal Cloud Status'
+          type: HTTP_AGENT
+          key: http_status_get_ovh_bmc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://bare-metal-servers.status-ovhcloud.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: OVH
+        - uuid: d79114dc69c7471c88e1542caafa76b9
+          name: 'OVH Bare Metal Cloud Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_ovh_bmcdesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://bare-metal-servers.status-ovhcloud.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: OVH
+        - uuid: 43aed8f715824787b18da43dd2666c47
+          name: 'OVH Network Infrastructure Status'
+          type: HTTP_AGENT
+          key: http_status_get_ovh_infra
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.indicator
+          url: 'https://network.status-ovhcloud.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: OVH
+        - uuid: ace3a1b4638a4f1fb0567397325306b6
+          name: 'OVH Network Infrastructure Detailed Status'
+          type: HTTP_AGENT
+          key: http_status_get_ovh_infradesc
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.status.description
+          url: 'https://network.status-ovhcloud.com/api/v2/status.json'
+          tags:
+            - tag: provider
+              value: OVH
+        - uuid: cfbe212df60b46f0b14ca5bba8717ff7
+          name: 'Microsoft Power Platform Status'
+          type: HTTP_AGENT
+          key: http_status_get_ppac
+          delay: 1h
+          value_type: TEXT
+          description: 'API call to the status page'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.Status
+          url: 'https://status.cloud.microsoft/api/posts/ppac'
+          tags:
+            - tag: provider
+              value: Microsoft
+          triggers:
+            - uuid: 99ffd1ca46d84e33a2db62c20dd45523
+              expression: 'last(/Cloud Down Detector/http_status_get_ppac)="major_outage"'
+              name: 'Major Incident at Provider: Microsoft Power Platform'
+              priority: WARNING
+              description: |
+                A major incident is reported on the status page.
+                Check the page for more details: https://status.cloud.microsoft
+              tags:
+                - tag: scope
+                  value: availability
+      httptests:
+        - uuid: cb4326b4333542f18215b5310fd90b93
+          name: Akamai
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://www.akamaistatus.com'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Akamai
+        - uuid: 49554b636b714cefaec6b16b152d3104
+          name: AWS
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://health.aws.amazon.com/health/status'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Amazon
+        - uuid: c91152e5bc2d4b40a0e30006a159a49e
+          name: Cloudflare
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://www.cloudflarestatus.com'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Cloudflare
+        - uuid: 79abcd2775d84d2f87bc79173d864a4e
+          name: Codabox
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://status.codabox.com'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Codabox
+        - uuid: 5fc2fce0c05b4e73810fd4fe7d697a42
+          name: Github
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://www.githubstatus.com'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Github
+        - uuid: b471158bca0c4d01bdf96f5439d9d4a8
+          name: 'Google Cloud'
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://status.cloud.google.com/'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Google
+        - uuid: 307525235e354fb7965c76a3ab9872bb
+          name: 'Google Workspace'
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://www.google.com/appsstatus/dashboard/'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Google
+        - uuid: 78264dac023a4193b48ab92e9d4aab5c
+          name: Microsoft
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://status.cloud.microsoft'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Microsoft
+        - uuid: 75376113d00e45c5b1af99ef9c331c50
+          name: Ookla
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://status.ookla.com'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: Ookla
+        - uuid: 2e8f39faf98b4938a258e6269eb36393
+          name: OVH
+          delay: 1h
+          verify_peer: 'YES'
+          steps:
+            - name: 'Status Page'
+              url: 'https://www.status-ovhcloud.com'
+              retrieve_mode: HEADERS
+              status_codes: '200'
+          tags:
+            - tag: provider
+              value: OVH
+      tags:
+        - tag: class
+          value: network
+        - tag: target
+          value: api
+      dashboards:
+        - uuid: b6e9fa99ae524df983ecd182111cf740
+          name: 'Cloud Status'
+          pages:
+            - name: 'Cloud Status Overview'
+              widgets:
+                - type: item
+                  name: 'Akamai Status'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 00AFEB
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_akamaidesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '25'
+                - type: item
+                  name: 'Ookla Status'
+                  'y': '3'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: '061E28'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_ookladesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '25'
+                - type: item
+                  name: 'Microsoft Azure Status'
+                  'y': '6'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 2FB3EC
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_azure
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'Microsoft 365 for Consumer Status'
+                  'y': '9'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 7F5BAF
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_m365consumer
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'Cloudflare Status'
+                  x: '18'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: F6821F
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_cloudflaredesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: 1C252A
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: piechart
+                  name: 'AWS Status'
+                  x: '18'
+                  'y': '3'
+                  width: '12'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 3BC97D
+                    - type: INTEGER
+                      name: ds.0.dataset_aggregation
+                      value: '2'
+                    - type: STRING
+                      name: ds.0.data_set_label
+                      value: Available
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Response code for step "Status Page" of scenario "AWS".'
+                    - type: STRING
+                      name: ds.1.color
+                      value: FF4000
+                    - type: INTEGER
+                      name: ds.1.dataset_aggregation
+                      value: '2'
+                    - type: STRING
+                      name: ds.1.data_set_label
+                      value: Unavaiilable
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: 'Failed step of scenario "AWS".'
+                    - type: INTEGER
+                      name: legend_lines
+                      value: '2'
+                    - type: INTEGER
+                      name: legend_value
+                      value: '1'
+                    - type: INTEGER
+                      name: space
+                      value: '3'
+                - type: svggraph
+                  name: 'Response Time'
+                  x: '18'
+                  'y': '7'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: axisx
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.0.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.0.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.0.color
+                      value: FFD54F
+                    - type: STRING
+                      name: ds.0.data_set_label
+                      value: Akamai
+                    - type: INTEGER
+                      name: ds.0.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Response time for step "Status Page" of scenario "Akamai".'
+                    - type: INTEGER
+                      name: ds.0.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.1.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.1.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.1.color
+                      value: FFA726
+                    - type: STRING
+                      name: ds.1.data_set_label
+                      value: AWS
+                    - type: INTEGER
+                      name: ds.1.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: 'Response time for step "Status Page" of scenario "AWS".'
+                    - type: INTEGER
+                      name: ds.1.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.2.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.2.aggregate_grouping
+                      value: '1'
+                    - type: INTEGER
+                      name: ds.2.approximation
+                      value: '7'
+                    - type: STRING
+                      name: ds.2.color
+                      value: FF6F00
+                    - type: STRING
+                      name: ds.2.data_set_label
+                      value: Cloudflare
+                    - type: INTEGER
+                      name: ds.2.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.2.items.0
+                      value: 'Response time for step "Status Page" of scenario "Cloudflare".'
+                    - type: INTEGER
+                      name: ds.2.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.3.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.3.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.3.color
+                      value: 80DEEA
+                    - type: STRING
+                      name: ds.3.data_set_label
+                      value: Codabox
+                    - type: INTEGER
+                      name: ds.3.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.3.items.0
+                      value: 'Response time for step "Status Page" of scenario "Codabox".'
+                    - type: INTEGER
+                      name: ds.3.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.4.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.4.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.4.color
+                      value: '263238'
+                    - type: STRING
+                      name: ds.4.data_set_label
+                      value: Github
+                    - type: INTEGER
+                      name: ds.4.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.4.items.0
+                      value: 'Response time for step "Status Page" of scenario "Github".'
+                    - type: INTEGER
+                      name: ds.4.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.5.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.5.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.5.color
+                      value: 4DB6AC
+                    - type: STRING
+                      name: ds.5.data_set_label
+                      value: Microsoft
+                    - type: INTEGER
+                      name: ds.5.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.5.items.0
+                      value: 'Response time for step "Status Page" of scenario "Microsoft".'
+                    - type: INTEGER
+                      name: ds.5.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.6.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.6.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.6.color
+                      value: 546E7A
+                    - type: STRING
+                      name: ds.6.data_set_label
+                      value: Ookla
+                    - type: INTEGER
+                      name: ds.6.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.6.items.0
+                      value: 'Response time for step "Status Page" of scenario "Ookla".'
+                    - type: INTEGER
+                      name: ds.6.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: ds.7.aggregate_function
+                      value: '3'
+                    - type: INTEGER
+                      name: ds.7.aggregate_grouping
+                      value: '1'
+                    - type: STRING
+                      name: ds.7.color
+                      value: 1565C0
+                    - type: STRING
+                      name: ds.7.data_set_label
+                      value: OVH
+                    - type: INTEGER
+                      name: ds.7.fill
+                      value: '0'
+                    - type: STRING
+                      name: ds.7.items.0
+                      value: 'Response time for step "Status Page" of scenario "OVH".'
+                    - type: INTEGER
+                      name: ds.7.transparency
+                      value: '0'
+                    - type: INTEGER
+                      name: legend_lines
+                      value: '10'
+                    - type: INTEGER
+                      name: legend_lines_mode
+                      value: '1'
+                    - type: STRING
+                      name: reference
+                      value: QJMMA
+                    - type: INTEGER
+                      name: righty
+                      value: '0'
+                - type: piechart
+                  name: 'Google Cloud Status'
+                  x: '30'
+                  'y': '3'
+                  width: '12'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 3BC97D
+                    - type: INTEGER
+                      name: ds.0.dataset_aggregation
+                      value: '2'
+                    - type: STRING
+                      name: ds.0.data_set_label
+                      value: Available
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Response code for step "Status Page" of scenario "Google Cloud".'
+                    - type: STRING
+                      name: ds.1.color
+                      value: FF4000
+                    - type: INTEGER
+                      name: ds.1.dataset_aggregation
+                      value: '2'
+                    - type: STRING
+                      name: ds.1.data_set_label
+                      value: Unavaiilable
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: 'Failed step of scenario "Google Cloud".'
+                    - type: INTEGER
+                      name: legend_lines
+                      value: '2'
+                    - type: INTEGER
+                      name: legend_value
+                      value: '1'
+                    - type: INTEGER
+                      name: space
+                      value: '3'
+                - type: item
+                  name: 'Codabox Status'
+                  x: '36'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 0D52FF
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_codaboxdesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: piechart
+                  name: 'Google Workspace Status'
+                  x: '42'
+                  'y': '3'
+                  width: '12'
+                  height: '4'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: 3BC97D
+                    - type: INTEGER
+                      name: ds.0.dataset_aggregation
+                      value: '2'
+                    - type: STRING
+                      name: ds.0.data_set_label
+                      value: Available
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'Response code for step "Status Page" of scenario "Google Workspace".'
+                    - type: STRING
+                      name: ds.1.color
+                      value: FF4000
+                    - type: INTEGER
+                      name: ds.1.dataset_aggregation
+                      value: '2'
+                    - type: STRING
+                      name: ds.1.data_set_label
+                      value: Unavaiilable
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: 'Failed step of scenario "Google Workspace".'
+                    - type: INTEGER
+                      name: legend_lines
+                      value: '2'
+                    - type: INTEGER
+                      name: legend_value
+                      value: '1'
+                    - type: INTEGER
+                      name: space
+                      value: '3'
+                - type: item
+                  name: 'Github Status'
+                  x: '54'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 0D1117
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_githubdesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '25'
+                - type: item
+                  name: 'OVH Bare Metal Cloud Status'
+                  x: '54'
+                  'y': '3'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: '214470'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_ovh_bmcdesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'OVH Infrastructure Status'
+                  x: '54'
+                  'y': '6'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: '214470'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_ovh_infradesc
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '25'
+                - type: item
+                  name: 'Microsoft Power Platform Status'
+                  x: '54'
+                  'y': '9'
+                  width: '18'
+                  height: '3'
+                  fields:
+                    - type: STRING
+                      name: bg_color
+                      value: 25AF7D
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: 'Cloud Down Detector'
+                        key: http_status_get_ppac
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: STRING
+                      name: value_color
+                      value: CFD8DC
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+      valuemaps:
+        - uuid: b81ebc2dce0f46698520fcfdd907c768
+          name: 'Service state'
+          mappings:
+            - value: none
+              newvalue: Up
+            - value: up
+              newvalue: Up
+            - value: degraded_performance
+              newvalue: Degraded
+            - value: partial_outage
+              newvalue: Degraded
+            - value: minor
+              newvalue: Degraded
+            - value: major_outage
+              newvalue: Down
+            - value: maintenance
+              newvalue: Maintenance
+            - value: Available
+              newvalue: Up
+            - value: Operational
+              newvalue: Up
+  triggers:
+    - uuid: 5bbd6b5270e946ce81093df3b03c6e92
+      expression: 'last(/Cloud Down Detector/web.test.fail[AWS])>0'
+      name: 'AWS Status Page is DOWN'
+      priority: DISASTER
+      tags:
+        - tag: scope
+          value: availability
+    - uuid: a42e29bf944044078e10ba41f92acc02
+      expression: 'last(/Cloud Down Detector/web.test.fail[Google Cloud])>0'
+      name: 'Google Cloud Status Page is DOWN'
+      priority: DISASTER
+      tags:
+        - tag: scope
+          value: availability
+    - uuid: 04aeba78d3b24447bbe9ad8caf95578e
+      expression: 'last(/Cloud Down Detector/web.test.fail[Google Workspace])>0'
+      name: 'Google Workspace Status Page is DOWN'
+      priority: DISASTER
+      tags:
+        - tag: scope
+          value: availability
+    - uuid: 13bcb51e3b0a4b51ac8b04dec7c8b2c1
+      expression: |
+        last(/Cloud Down Detector/http_status_get_ovh_bmc)="major_outage"
+
+        or
+
+        last(/Cloud Down Detector/http_status_get_ovh_infra)="major_outage"
+      name: 'Major Incident at Provider: OVH'
+      priority: HIGH
+      description: |
+        A major incident is reported on the status page.
+        Check the page for more details: https://www.status-ovhcloud.com/
+      type: MULTIPLE
+      tags:
+        - tag: scope
+          value: availability
