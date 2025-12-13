@@ -10,7 +10,7 @@ zabbix_export:
       description: 'TCP check against Minecraft ports'
       vendor:
         name: astsu777
-        version: 1.0.1
+        version: 1.0.2
       groups:
         - name: Templates
       items:
@@ -38,12 +38,32 @@ zabbix_export:
               expression: 'last(/Minecraft/net.tcp.port[{$MINECRAFT.HOST},{$MINECRAFT.SFTP.PORT}],#1)=0'
               name: 'Minecraft SFTP server is DOWN'
               priority: AVERAGE
+        - uuid: 7688e57566fe484c881977643cffc563
+          name: 'AMP Public Service'
+          type: SIMPLE
+          key: 'net.tcp.service[http,{$AMP.HOST},{$AMP.PORT}]'
+          description: 'AMP should not be publicly available and should be hosted behind a reverse proxy'
+          tags:
+            - tag: Application
+              value: AMP
+          triggers:
+            - uuid: 9e7d9b5e112644da9b8941475389c4df
+              expression: 'last(/Minecraft/net.tcp.service[http,{$AMP.HOST},{$AMP.PORT}],#1)<>0'
+              name: 'AMP is publicly available'
+              priority: HIGH
+              description: 'AMP should not be publicly available and should be hosted behind a reverse proxy'
       tags:
         - tag: class
           value: software
         - tag: target
           value: minecraft
       macros:
+        - macro: '{$AMP.HOST}'
+          value: '{HOST.HOST}'
+          description: 'FQDN/IP of the AMP server if different from the host'
+        - macro: '{$AMP.PORT}'
+          value: '8080'
+          description: 'TCP port of the AMP listener'
         - macro: '{$MINECRAFT.HOST}'
           value: '{HOST.HOST}'
           description: 'FQDN/IP of the Minecraft server if different from the host'
