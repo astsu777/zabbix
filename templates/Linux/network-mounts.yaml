@@ -1,0 +1,61 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 9714162a42254c149dda8353a35fccbf
+      template: 'Linux Network Mount'
+      name: 'Linux Network Mount'
+      description: |
+        Check if a network mount point is actually mounted or not and returns a numerical value.
+
+        0 => Mounted
+        1 => Not mounted
+      vendor:
+        name: astsu777
+        version: 1.0.0
+      groups:
+        - name: Templates
+      discovery_rules:
+        - uuid: 67c81f98ed43450d80e3907ba8ce397c
+          name: 'Discover Network filesystems'
+          key: vfs.fs.discovery
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#FSTYPE}'
+                value: ^(nfs|nfs4|cifs|fuse)$
+          item_prototypes:
+            - uuid: 71425ce38fc543c385154fdf6d286800
+              name: 'Network filesystem status: {#FSNAME}'
+              key: 'system.run[findmnt -nr -o source -T "{#FSNAME}" > /dev/null && echo 0]'
+              trends: '0'
+              valuemap:
+                name: 'FS Status'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+              trigger_prototypes:
+                - uuid: 9ce75286e70844c49da7a1dea4e26b93
+                  expression: 'last(/Linux Network Mount/system.run[findmnt -nr -o source -T "{#FSNAME}" > /dev/null && echo 0])=1'
+                  name: 'Network filesystem {#FSNAME} is not mounted'
+                  priority: HIGH
+                  tags:
+                    - tag: scope
+                      value: availability
+      tags:
+        - tag: class
+          value: os
+        - tag: target
+          value: linux
+      valuemaps:
+        - uuid: 1a96e90a314e46eca90573ca54178dd2
+          name: 'FS Status'
+          mappings:
+            - value: '0'
+              newvalue: Mounted
+            - type: DEFAULT
+              newvalue: 'Not mounted'
