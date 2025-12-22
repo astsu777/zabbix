@@ -44,18 +44,18 @@ N/A
 
 |Name|Description|Expression|Priority|
 |----|-----------|----------|--------|
-|AWS Status Page is DOWN|-|last(/Magvice - Cloud Down Detector/web.test.fail[AWS])>0|Disaster|
-|Google Cloud Status Page is DOWN|-|last(/Magvice - Cloud Down Detector/web.test.fail[Google Cloud])>0|Disaster|
-|Google Workspace Status Page is DOWN|-|last(/Magvice - Cloud Down Detector/web.test.fail[Google Workspace])>0|Disaster|
-|Major Incident at Provider: Akamai|-|last(/Magvice - Cloud Down Detector/http_status_get_akamai)="major_outage"|Disaster|
-|Major Incident at Provider: Cloudflare|-|last(/Magvice - Cloud Down Detector/http_status_get_cloudflare)="major_outage"|Disaster|
-|Major Incident at Provider: Codabox|-|last(/Magvice - Cloud Down Detector/http_status_get_codabox)="major_outage"|High|
-|Major Incident at Provider: Github|-|last(/Magvice - Cloud Down Detector/http_status_get_github)="major_outage"|Average|
-|Major Incident at Provider: Microsoft 365 (Consumers)|-|last(/Magvice - Cloud Down Detector/http_status_get_m365consumer)="major_outage"|High|
-|Major Incident at Provider: Microsoft Azure|-|last(/Magvice - Cloud Down Detector/http_status_get_azure)="major_outage"|Disaster|
-|Major Incident at Provider: Microsoft Power Platform|-|last(/Magvice - Cloud Down Detector/http_status_get_ppac)="major_outage"|Warning|
-|Major Incident at Provider: Ookla|-|last(/Magvice - Cloud Down Detector/http_status_get_github)="major_ookla"|Warning|
-|Major Incident at Provider: OVH|-|last(/Magvice - Cloud Down Detector/http_status_get_ovh_bmc)="major_outage" or last(/Magvice - Cloud Down Detector/http_status_get_ovh_infra)="major_outage"|High|
+|AWS Status Page is DOWN|-|last(/Cloud Down Detector/web.test.fail[AWS])>0|Disaster|
+|Google Cloud Status Page is DOWN|-|last(/Cloud Down Detector/web.test.fail[Google Cloud])>0|Disaster|
+|Google Workspace Status Page is DOWN|-|last(/Cloud Down Detector/web.test.fail[Google Workspace])>0|Disaster|
+|Major Incident at Provider: Akamai|-|last(/Cloud Down Detector/http_status_get_akamai)="major_outage"|Disaster|
+|Major Incident at Provider: Cloudflare|-|last(/Cloud Down Detector/http_status_get_cloudflare)="major_outage"|Disaster|
+|Major Incident at Provider: Codabox|-|last(/Cloud Down Detector/http_status_get_codabox)="major_outage"|High|
+|Major Incident at Provider: Github|-|last(/Cloud Down Detector/http_status_get_github)="major_outage"|Average|
+|Major Incident at Provider: Microsoft 365 (Consumers)|-|last(/Cloud Down Detector/http_status_get_m365consumer)="major_outage"|High|
+|Major Incident at Provider: Microsoft Azure|-|last(/Cloud Down Detector/http_status_get_azure)="major_outage"|Disaster|
+|Major Incident at Provider: Microsoft Power Platform|-|last(/Cloud Down Detector/http_status_get_ppac)="major_outage"|Warning|
+|Major Incident at Provider: Ookla|-|last(/Cloud Down Detector/http_status_get_github)="major_ookla"|Warning|
+|Major Incident at Provider: OVH|-|last(/Cloud Down Detector/http_status_get_ovh_bmc)="major_outage" or last(/Cloud Down Detector/http_status_get_ovh_infra)="major_outage"|High|
 
 ## Graphs
 
