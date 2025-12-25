@@ -1,0 +1,247 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 01278d0e2793427aa907f1366bf87f59
+      template: 'Linux Unattended Upgrades'
+      name: 'Linux Unattended Upgrades'
+      description: 'Monitor unattended upgrades on Debian based distributions.'
+      vendor:
+        name: astsu777
+        version: 1.0.0
+      groups:
+        - name: Templates
+      items:
+        - uuid: baf772be11f248568cedd6f036c76fbb
+          name: 'Log: Installed Upgrades'
+          type: ZABBIX_ACTIVE
+          key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log,^Log\sstarted.*(\R.*?)+ended\:.(\d{4}-\d{2}-\d{2}\s+.\d{2}\:\d{2}:\d{2}),UTF8,20,,,]'
+          delay: 10m
+          history: 5d
+          value_type: LOG
+          description: 'Collect the unattended upgrades log which can then be parsed.'
+          logtimefmt: 'y.M.d..h:m:s'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+          triggers:
+            - uuid: 5ee7637ae0a048609e56374659cc2b06
+              expression: 'last(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log,^Log\sstarted.*(\R.*?)+ended\:.(\d{4}-\d{2}-\d{2}\s+.\d{2}\:\d{2}:\d{2}),UTF8,20,,,],#1:now-1d)<>0'
+              name: 'Updates have been installed'
+              priority: INFO
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
+        - uuid: 108274a683024917bd668537d5617410
+          name: 'Log: Unattended-Upgrades'
+          type: ZABBIX_ACTIVE
+          key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades.log,,UTF8,20,,,]'
+          delay: 30m
+          history: 5d
+          value_type: LOG
+          description: 'Collect the unattended upgrades log which can then be parsed.'
+          logtimefmt: 'y.M.d.h:m:s'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+          triggers:
+            - uuid: dfe80578bace44a3a9bb6d5cec03c9f0
+              expression: 'find(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades.log,,UTF8,20,,,],,"like","ERROR")=1'
+              name: 'Error {ITEM.LASTVALUE} when installing unattended-upgrades'
+              priority: AVERAGE
+              description: |
+                If the unattended upgrades tool prints an ERROR line to the log, it's a safe assumption something broke. Manual investigation is required.
+
+                It's a goo idea to start with /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
+        - uuid: e45f2de3401c417e827a9cb742affcd7
+          name: 'Available Upgrades'
+          key: 'system.run[/usr/bin/apt list --upgradable 2>/dev/null]'
+          delay: 5m
+          history: 5d
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: 71d1cc0a6a27497b9fcf9de2ef288a94
+          name: 'Ubuntu Server Metapackage'
+          key: 'system.run[/usr/bin/tasksel --list-tasks | /bin/grep ''Basic Ubuntu server'']'
+          delay: 15m
+          history: 5d
+          value_type: TEXT
+          description: 'find out if the ubuntu server metapackage is installed. we list them all then do a regex match to find just that line'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: 12acfbaf44f641e5bc8732f3ae4da5e8
+          name: 'MOTD notifier'
+          key: 'vfs.file.exists[/etc/update-motd.d/90-updates-available]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: '/etc/update-motd.d/90-updates-available needs to exist or update-notifier-common package is not installed so you don''t get a MOTD notification as a fall back for unattended upgrades'
+          preprocessing:
+            - type: BOOL_TO_DECIMAL
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: 5045c27efe984df59229c60602b8cf3b
+          name: 'Check Unattended Upgrades'
+          key: 'vfs.file.exists[/usr/bin/unattended-upgrade]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: 'If this binary does not exist then unattended-upgrades package is not installed'
+          preprocessing:
+            - type: BOOL_TO_DECIMAL
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+          triggers:
+            - uuid: 0aa4cd59371540a2a679ffb34f135d04
+              expression: 'last(/Linux Unattended Upgrades/vfs.file.exists[/usr/bin/unattended-upgrade])=0'
+              name: 'Unattended-upgrades package is not installed'
+              priority: WARNING
+              description: 'If /usr/bin/unattended-upgrade binary doesn''t exist then package unattended-upgrades is not installed and therefore, alert us to this fact.'
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
+        - uuid: 98086a85dc7e4479b2cf949d49078ee0
+          name: 'Reboot Required'
+          key: 'vfs.file.exists[/var/run/reboot-required]'
+          delay: 10m
+          history: 5d
+          trends: 30d
+          description: 'Checks if host needs a reboot presence of file confirms it does'
+          preprocessing:
+            - type: BOOL_TO_DECIMAL
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+          triggers:
+            - uuid: 23ac585dd3494cea92bf3a3e6f99b2d4
+              expression: 'avg(/Linux Unattended Upgrades/vfs.file.exists[/var/run/reboot-required],24h)=1'
+              name: 'The host needs to be restarted'
+              priority: INFO
+              description: |
+                If /var/run/reboot-required exists alert that reboot needed.
+
+                Only alert if reboot required flag exists for 24 hours or more (to allow for overnight auto-reboots without alerting)
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
+        - uuid: d1f96bb63eae45fe894794c3bda8cf75
+          name: 'Auto-Fix DPKG'
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,Unattended-Upgrade\:\:AutoFixInterruptedDpkg\s+\"true\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: 'ensure /etc/apt/apt.conf.d/50unattended-upgrades has the  Unattended-Upgrade::AutoFixInterruptedDpkg "true"; line uncommented'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+          triggers:
+            - uuid: 5a1052ce89a040c9bf07ca057ea72471
+              expression: 'last(/Linux Unattended Upgrades/vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,Unattended-Upgrade\:\:AutoFixInterruptedDpkg\s+\"true\"\;,UTF8,,])=0'
+              name: 'Auto-Fix DPKG is not enabled in /etc/apt/apt.conf.d/50unattended-upgrades'
+              priority: WARNING
+              description: 'If auto-fix dpkg is not enabled in /etc/apt/apt.conf.d/50unattended-upgrades throw an alert'
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
+        - uuid: a05695ae96fb4fa4b4a0b3c788321c05
+          name: 'Remove Unused Dependencies'
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,Unattended-Upgrade\:\:Remove-Unused-Dependencies\s+\"true\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: 'ensure /etc/apt/apt.conf.d/50unattended-upgrades has the //Unattended-Upgrade::Remove-Unused-Dependencies "true"; line uncommented'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+          triggers:
+            - uuid: ef3504b0719b4d999eee5b9a7741b537
+              expression: 'last(/Linux Unattended Upgrades/vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,Unattended-Upgrade\:\:Remove-Unused-Dependencies\s+\"true\"\;,UTF8,,])=0'
+              name: 'Remove-Unused-Dependencies is not enabled in /etc/apt/apt.conf.d/50unattended-upgrades'
+              priority: WARNING
+              description: 'if Remove-Unused-Dependencies is not enabled in /etc/apt/apt.conf.d/50unattended-upgrades throw an alert'
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
+        - uuid: 15951d8dad2a45eb86ffa159c6454054
+          name: Remove-Unused-Kernel-Packages
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,Unattended-Upgrade\:\:Remove\-Unused\-Kernel\-Packages\s+\"true\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: 'ensure /etc/apt/apt.conf.d/50unattended-upgrades has the Remove-Unused-Kernel-Packages "true"; line uncommented'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: 38e7f20e738b4088a707c52b98961fcd
+          name: 'Ubuntu Non-security Updates'
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,\s+\"\$\{distro\_id}\:\$\{distro\_codename\}\-updates\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: 'ensure /etc/apt/apt.conf.d/50unattended-upgrades has the  "${distro_id}:${distro_codename}-updates"; uncommented'
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: 66d74b34f00d444d83725980a83ba350
+          name: 'Debian Security Updates'
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,^\s*\"origin\=Debian\Wcodename\=\$\{distro_codename}\Wlabel\=Debian\-Security\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: |
+            ensure /etc/apt/apt.conf.d/50unattended-upgrades has the          "origin=Debian,codename=${distro_codename},label=Debian-Security";
+
+            I have used \W for non-word character as \, passed regex tests online but made zabbix say too many parameters.
+
+            This is the debian check as it differs somewha from the Ubuntu check syntax.
+
+            Triggers take account of both.
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: 7489677ccab84d27841bb85b4dbd00e8
+          name: 'Debian Non-security Updates'
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,^\s+\"o\=Debian\Wa\=stable\-updates\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: |
+            ensure /etc/apt/apt.conf.d/50unattended-upgrades has the
+                  "o=Debian,a=stable-updates";
+
+            I have used \W for non-word character as \, passed regex tests online but made zabbix say too many parameters.
+
+            This is the debian check as it differs somewha from the Ubuntu check syntax.
+
+            Triggers take account of both.
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+        - uuid: ca2626466fef483385712886dba3f1a6
+          name: 'Ubuntu Security Updates'
+          key: 'vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,^\s+\"\$\{distro\_id}\:\$\{distro\_codename\}\-security\"\;,UTF8,,]'
+          delay: 5m
+          history: 5d
+          trends: 30d
+          description: |
+            ensure /etc/apt/apt.conf.d/50unattended-upgrades has the  "${distro_id}:${distro_codename}-security"; uncommented
+
+            This is the Ubuntu item.
+          tags:
+            - tag: Application
+              value: 'Unattended Upgrades'
+      tags:
+        - tag: class
+          value: os
+        - tag: target
+          value: linux
