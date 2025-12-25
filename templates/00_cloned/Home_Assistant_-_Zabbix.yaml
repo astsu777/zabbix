@@ -1,0 +1,2711 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: f10fc491a20f4d0983147fe4c6d7c361
+      name: Templates
+  templates:
+    - uuid: c19dc59136f14d8b8811cc9a1a04ec03
+      template: 'Home Assistant - Zabbix'
+      name: 'Home Assistant - Zabbix'
+      description: |
+        Home Assistant Template, created by Thomas Rzen.
+        
+        To ensure this template operates correctly, the URL and API key should be stored in the Macros section.
+        
+        If you need help, visit https://github.com/Garfieldttt/zabbix-homeassistant.
+      groups:
+        - name: Templates
+      items:
+        - uuid: 6dba9b465bee41e38d84bb3be92179d7
+          name: HA-raw
+          type: HTTP_AGENT
+          key: ha.raw
+          history: '0'
+          value_type: TEXT
+          url: '{$HA.URL}/api/states'
+          headers:
+            - name: Authorization
+              value: 'Bearer {$API.TOKEN}'
+          output_format: JSON
+          triggers:
+            - uuid: dc755594ffd44b4f94ecc40da983f6ca
+              expression: 'nodata(/Home Assistant - Zabbix/ha.raw,900)=1 and {$HOST.REACHABLE}=1'
+              name: 'The host is not reachable!'
+              priority: HIGH
+        - uuid: 7007ec0eb3474469879e9696e0658bde
+          name: 'Home Assistant Core Update'
+          type: DEPENDENT
+          key: update.home.assistant.core.update
+          trends: '0'
+          valuemap:
+            name: update
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+            - type: STR_REPLACE
+              parameters:
+                - 'on'
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - 'off'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: update-core
+          triggers:
+            - uuid: 90db5d1c9fe440f7be6e40df64d38051
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.core.update)=1'
+              name: 'Home Assistant update for Home Assistant Core Update is available.'
+              priority: INFO
+        - uuid: 468e17e07d844e5587c2c79b340cdb4d
+          name: 'Home Assistant Supervisor Update'
+          type: DEPENDENT
+          key: update.home.assistant.supervisor.update
+          trends: '0'
+          valuemap:
+            name: update
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+            - type: STR_REPLACE
+              parameters:
+                - 'on'
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - 'off'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: update-supervisor
+          triggers:
+            - uuid: 76c052dfcbeb4657a8bfb6a8620a0e9c
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
+              name: 'Home Assistant update for Home Assistant supervisor Update is available.'
+              priority: INFO
+      discovery_rules:
+        - uuid: 6072122ab76f43f78958154d1ac01c1a
+          name: HA-backup.manager.state
+          type: DEPENDENT
+          key: backup.manager.state
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.backup_backup_manager_.+$
+          item_prototypes:
+            - uuid: 895e9b2907d241328d7e574d4235a74c
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'backup.manager.state[{#ENTITY_ID}]'
+              trends: '0'
+              description: |
+                | Number | State Key        | Description     |
+                | ---: | :--------------- | :--------------- |
+                |    0 | `idle`           | Idle             |
+                |    1 | `create_backup`  | Creating backup  |
+                |    2 | `receive_backup` | Receiving backup |
+                |    3 | `restore_backup` | Restoring backup |
+                |    4 | `blocked`        | Backup blocked   |
+              valuemap:
+                name: backup_manager
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - idle
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - create_backup
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - receive_backup
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - restore_backup
+                    - '3'
+                - type: STR_REPLACE
+                  parameters:
+                    - blocked
+                    - '4'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: backup-manager-state
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9d4cb7a66c424a488e92e6260561ab61
+          name: HA-automation
+          type: DEPENDENT
+          key: ha.automation
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^automation\..*'
+          item_prototypes:
+            - uuid: 6b0a5a3334374f1797ba5effe74cba38
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.autot[{#ENTITY_ID}]'
+              trends: 730d
+              valuemap:
+                name: automation
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: automations
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 8989a186d07141c7aa8011ada4dcdf30
+          name: HA-batterie
+          type: DEPENDENT
+          key: ha.batt
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^battery$
+          item_prototypes:
+            - uuid: 59fda6a5606a415597a9815306f9e43c
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.bat[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '!%'
+              valuemap:
+                name: battery
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - Unavailable
+                    - '-1'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '-1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '-1'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: battery-level
+              trigger_prototypes:
+                - uuid: 9d4d8bbd0404402c8cfdba66a2e15a1f
+                  expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],300)<={$BATTERY.MINIMUM:"{#ENTITY_ID}"}'
+                  name: 'Battery of {#FRIENDLY_NAME} is low.'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                  dependencies:
+                    - name: 'Battery status of {#FRIENDLY_NAME} unavailable'
+                      expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],{$BATTERY_TRIGGER_TIMEOUT})=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
+                - uuid: 43c52dcc00654dbebe034511c6ee45ce
+                  expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],{$BATTERY_TRIGGER_TIMEOUT})=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
+                  name: 'Battery status of {#FRIENDLY_NAME} unavailable'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="battery")]'
+        - uuid: f6e34dd487924f56a6105a6556ffc779
+          name: HA-camera
+          type: DEPENDENT
+          key: ha.camera
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^camera\..*'
+          item_prototypes:
+            - uuid: fb71e1dcdbc34fe59fde86a3e73a1303
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.cam.stat[{#ENTITY_ID}]'
+              trends: 730d
+              valuemap:
+                name: camera
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - available
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - idle
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: camera
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 22c196a88b1f44a3891be30c37a32a15
+          name: HA-contact-sensor
+          type: DEPENDENT
+          key: ha.contact
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^door$
+          item_prototypes:
+            - uuid: e527a0f8ba8a49758058cb8bb53824ff
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.conbtact[{#ENTITY_ID}]'
+              trends: 730d
+              valuemap:
+                name: contact-sensot
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: contact-sensor-state
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="door")]'
+        - uuid: 19b61768971c49a49e0950b458515bfe
+          name: HA-dbm-linkquality
+          type: DEPENDENT
+          key: ha.dbm.linkquality
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^signal_strength$
+          item_prototypes:
+            - uuid: 09bbb2d5f8fe454fab21dfff2b47ab82
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.dbm.linkquality[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '!{#UNITS}'
+              valuemap:
+                name: dbm
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: dbm
+              trigger_prototypes:
+                - uuid: 0864bc58e5834485bae44ae3098c9fb5
+                  expression: |
+                    min(/Home Assistant - Zabbix/ent.dbm.linkquality[{#ENTITY_ID}],5m)  
+                      < {$SWITCH.TRIGGER.DBM:"{#ENTITY_ID}"}  
+                    or  
+                    last(/Home Assistant - Zabbix/ent.dbm.linkquality[{#ENTITY_ID}])  
+                      < {$DBM.SIGNAL.MINIMUM:"{#ENTITY_ID}"}  
+                      and {$SWITCH.TRIGGER.DBM:"{#ENTITY_ID}"} = 1
+                  name: 'The dBm connection of {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
+                  priority: HIGH
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="signal_strength")]'
+        - uuid: 44c1fe3d980b41f08e3da00a8399dc5e
+          name: HA-disk.free
+          type: DEPENDENT
+          key: ha.disk.free
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_disk_free.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_freier_massenspeicher.*$'
+          item_prototypes:
+            - uuid: b6062ce4f1574c3b806523e0eea96cdc
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'disk.free.mb[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: disk-free
+              trigger_prototypes:
+                - uuid: 8ead8fd836534a299ae7221e33a226d6
+                  expression: 'min(/Home Assistant - Zabbix/disk.free.mb[{#ENTITY_ID}],5m)<{$DISK.PFREE.MIN.WARN.GIB}'
+                  name: '{#FRIENDLY_NAME}: Running out of space'
+                  opdata: 'Free space:  {ITEM.LASTVALUE}'
+                  priority: HIGH
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 3add11e7715d4b41b9acd3fa4f678d77
+          name: HA-disk.used
+          type: DEPENDENT
+          key: ha.disk.used
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_disk_use.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_belegter_massenspeicher.*$'
+          item_prototypes:
+            - uuid: 1d91994650b948cb9886d9b0d22f4ea9
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'disk.used.mb[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: disk-used
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 2b2c857233da4897a8dc162218c6a61e
+          name: HA-distance
+          type: DEPENDENT
+          key: ha.distance
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^distance$
+              - macro: '{#ENTITY_ID}'
+                value: '.*_distance$'
+          item_prototypes:
+            - uuid: 5bf81d8bb8fe49209919d398a2600b66
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.meters.walked[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: '0'
+              units: '!{#UNITS}'
+              valuemap:
+                name: distance
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '-1'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '-2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: meters-moved
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="distance")]'
+        - uuid: 122e8e97717142399f96769dcbc2b1ab
+          name: HA-fine-dust
+          type: DEPENDENT
+          key: ha.fine.dust
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_pm25$'
+          item_prototypes:
+            - uuid: 006af290c5a14e26a737ae339f2b77b0
+              name: 'Find dust {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'fine.dust[{#ENTITY_ID}]'
+              trends: 730d
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: fine-dust
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: a9d0a00639594b69bdab5870f24e5c79
+          name: HA-floors-ascended
+          type: DEPENDENT
+          key: ha.floors.ascended
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_ascended$'
+          item_prototypes:
+            - uuid: 9e92f33d90884a14abf4bcdf86f97302
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.floors.ascended[{#ENTITY_ID}]'
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: floors-ascended
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 81e12de040814b96960fa3f34d8ed0a8
+          name: HA-floors-descended
+          type: DEPENDENT
+          key: ha.floors.descended
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_descended$'
+          item_prototypes:
+            - uuid: 312fa08a851c4b57980951613383b2ac
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.floors.descended[{#ENTITY_ID}]'
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: floors-descended
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 09616a3a336947bc94cd7bf970b9870c
+          name: HA-weather-forecast
+          type: DEPENDENT
+          key: ha.forecast
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*forecast_home$'
+          item_prototypes:
+            - uuid: 7b565ca79b1d4f7abe72b7608de51698
+              name: 'Weather forecast {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.forecast[{#ENTITY_ID}]'
+              trends: 730d
+              description: |
+                1=Clear, night: The sky is clear during the night.
+                2=Cloudy: There are many clouds in the sky.
+                3=Fog: There is a thick mist or fog reducing visibility.
+                4=Hail: Hailstones are falling.
+                5=Lightning: Lightning/thunderstorms are occurring.
+                6=Lightning, rainy: Lightning/thunderstorm is occurring along with rain.
+                7=Partly cloudy: The sky is partially covered with clouds.
+                8=Pouring: It is raining heavily.
+                9=Rainy: It is raining.
+                10=Snowy: It is snowing.
+                11=Snowy, rainy: It is snowing and raining at the same time.
+                12=Sunny: The sky is clear and the sun is shining.
+                13=Windy: It is windy.
+                14=Windy, cloudy: It is windy and cloudy.
+                15=Exceptional: Exceptional weather conditions are occurring.
+              valuemap:
+                name: weather
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - clear-night
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - cloudy
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - fog
+                    - '3'
+                - type: STR_REPLACE
+                  parameters:
+                    - hail
+                    - '4'
+                - type: STR_REPLACE
+                  parameters:
+                    - lightning
+                    - '5'
+                - type: STR_REPLACE
+                  parameters:
+                    - lightning-rainy
+                    - '6'
+                - type: STR_REPLACE
+                  parameters:
+                    - partly2
+                    - '7'
+                - type: STR_REPLACE
+                  parameters:
+                    - pouring
+                    - '8'
+                - type: STR_REPLACE
+                  parameters:
+                    - rainy
+                    - '9'
+                - type: STR_REPLACE
+                  parameters:
+                    - snowy
+                    - '10'
+                - type: STR_REPLACE
+                  parameters:
+                    - snowy-rainy
+                    - '11'
+                - type: STR_REPLACE
+                  parameters:
+                    - sunny
+                    - '12'
+                - type: STR_REPLACE
+                  parameters:
+                    - windy
+                    - '13'
+                - type: STR_REPLACE
+                  parameters:
+                    - windy-variant
+                    - '14'
+                - type: STR_REPLACE
+                  parameters:
+                    - exceptional
+                    - '15'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: weather-forecast
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 6f75a2ff213e4872bef3ede2b74223af
+          name: HA-geo
+          type: DEPENDENT
+          key: ha.geo
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_location$'
+              - macro: '{#ENTITY_ID}'
+                value: '^person\..*$'
+          item_prototypes:
+            - uuid: ed39b95d38c6409db343b54e0a024305
+              name: 'Latitude of {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.tracker.latitude[{#ENTITY_ID}]'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude.first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: tracker-latitude
+            - uuid: fe83ba319e1a4cf59ee14f9370348e35
+              name: 'Longitude of {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.tracker.longitude[{#ENTITY_ID}]'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude.first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: tracker-longitude
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: d013cf6e14b640da883bde2420ab8c3f
+          name: HA-Illuminance
+          type: DEPENDENT
+          key: ha.illu
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^illuminance$
+          item_prototypes:
+            - uuid: 002d54f1878749abab46bc5ad32f360b
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.illu[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: illuminance
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="illuminance")]'
+        - uuid: 30357ea88b76439891f28ca50b12c881
+          name: HA-kWh
+          type: DEPENDENT
+          key: ha.kwh
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^energy$
+          item_prototypes:
+            - uuid: 3f96defee8264328aad69bd9fc180d45
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.kwh[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '!{#UNITS}'
+              valuemap:
+                name: kWh
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: used-kWh
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="energy")]'
+        - uuid: 3b7a1e1ea6274567b9cd9b51337ecf55
+          name: HA-light
+          type: DEPENDENT
+          key: ha.light
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^light\..*'
+          item_prototypes:
+            - uuid: 092111599f1745fcbf6975d61240649f
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.light[{#ENTITY_ID}]'
+              valuemap:
+                name: light
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: light
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 0033a85d3a0a4ea8a0d547a7d127b9f5
+          name: HA-zigbee-linkquality
+          type: DEPENDENT
+          key: ha.linkquality
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_linkquality$'
+          item_prototypes:
+            - uuid: 1e2e78b2e5d247c4923fdf237f12084d
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.linkquality[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '-1'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: zigbee-linkquality
+              trigger_prototypes:
+                - uuid: 86faaa3e2ed24115885d74f984c84dae
+                  expression: 'max(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"})=-1'
+                  name: 'The ZigBee connection {#FRIENDLY_NAME}: unavailable'
+                  priority: AVERAGE
+                - uuid: 5cecf8c99e4847c5822cd33aea37a98e
+                  expression: |
+                    max(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT})<={$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"}
+                    and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1
+                  name: 'The ZigBee connection {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: a856f85673744f888159cd492f88dee3
+          name: HA-humidity
+          type: DEPENDENT
+          key: ha.luft
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^humidity$
+          item_prototypes:
+            - uuid: c988f89192e4493e9ffe5964933d12e5
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.luft[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: humidity
+              trigger_prototypes:
+                - uuid: 2d088d011ed445a5a5d4a6a9a4cf442f
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.WARNING.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.CRITICAL.LOW:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is <= {$TRIGGER.HUMIDITY.WARNING.LOW}%)'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 061cb5d1f1f944919e1a66f741c91530
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.WARNING.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.CRITICAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is >= {$TRIGGER.HUMIDITY.WARNING.HIGH}%'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: fdff27b0989f4094b82954b0f23aef9f
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}] ) >= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) < {$TRIGGER.HUMIDITY.WARNING.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.HUMIDITY.NORMAL.HIGH}-{$TRIGGER.HUMIDITY.WARNING.HIGH}%'
+                  priority: WARNING
+                  manual_close: 'YES'
+                - uuid: 579b030e286d46da922e35d829702086
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) > {$TRIGGER.HUMIDITY.WARNING.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.HUMIDITY.WARNING.LOW}-{$TRIGGER.HUMIDITY.NORMAL.LOW}%'
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="humidity")]'
+        - uuid: c74c8347d9024a7b8e84f23dbaa3a5e6
+          name: HA-memory-free-mb
+          type: DEPENDENT
+          key: ha.memory.free.mb
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_freier_arbeitsspeicher$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_memory_free$'
+          item_prototypes:
+            - uuid: be1d33d03b014857a6e90d59472dc688
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'memory.free.mb[{#ENTITY_ID}]'
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: memory-free
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 8495a7e175c94b4bbb2b3571a4ae621a
+          name: HA-memory-use
+          type: DEPENDENT
+          key: ha.memory.use
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_arbeitsspeicherauslastung$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_memory_use_percent$'
+          item_prototypes:
+            - uuid: 14b5a39218454d859258e465c9a189b5
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'memory.used.p[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: memory-utilization
+              trigger_prototypes:
+                - uuid: ea7369b045aa448b8218d04803e9067e
+                  expression: 'min(/Home Assistant - Zabbix/memory.used.p[{#ENTITY_ID}],5m)>{$MEMORY.UTIL.MAX.PERCENT}'
+                  name: 'High memory utilization (>{$MEMORY.UTIL.MAX.PERCENT}% for 5m)'
+                  opdata: 'Current memory usage: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: capacity
+                    - tag: scope
+                      value: performance
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9f17953623fe478c90ef819e4bcc270c
+          name: HA-memory-used-mb
+          type: DEPENDENT
+          key: ha.memory.used.mb
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_belegter_arbeitsspeicher$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_memory_use$'
+          item_prototypes:
+            - uuid: 2ec8fb8823054f449c6a71bec0fd41b4
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'memory.used.mb[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: memory-used
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: cf883e5399094a0c9a4f660bc215cde8
+          name: HA-occupancy
+          type: DEPENDENT
+          key: ha.occupancy
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_occupancy$'
+          item_prototypes:
+            - uuid: 8f992d64ebf14949bf460168d29e7c02
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.occupancy[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              valuemap:
+                name: occupancy
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: occupancy
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 4a0ab44a0ac34ac7b874ab9491540bf9
+          name: HA-atmospheric-pressure
+          type: DEPENDENT
+          key: ha.pressure
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^atmospheric_pressure$
+          item_prototypes:
+            - uuid: a925c068dec04ea6934dddb70f6a3713
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.pressure[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: atmospheric-pressure
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="atmospheric_pressure")]'
+        - uuid: b24ba2ff14204a9ba31c98000bdfa03d
+          name: HA-processor-use
+          type: DEPENDENT
+          key: ha.processor.use
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_processor_use$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_prozessornutzung$'
+          item_prototypes:
+            - uuid: 2cd6b34129f545478298fd9d14f22147
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'cpu.utilization[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: cpu-utilization
+              trigger_prototypes:
+                - uuid: cc062d6dd9844e3a935dc5ae413f9651
+                  expression: 'min(/Home Assistant - Zabbix/cpu.utilization[{#ENTITY_ID}],5m)>{$CPU.UTIL.MAX.PERCENT}'
+                  name: 'High CPU utilization (over {$CPU.UTIL.MAX.PERCENT}% for 5m)'
+                  opdata: 'Current CPU utilization: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: performance
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 540ec3cfe4a24ef28c0ae70417402b2b
+          name: HA-restart
+          type: DEPENDENT
+          key: ha.restart
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_restart$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_restart_required$'
+          item_prototypes:
+            - uuid: bf999d748c114fc687c75561d200506d
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.restart[{#ENTITY_ID}]'
+              valuemap:
+                name: 'restart required'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '3'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: restart-required
+              trigger_prototypes:
+                - uuid: 3d4cb2cff0314dc0b76547c0b4fea022
+                  expression: 'last(/Home Assistant - Zabbix/ent.restart[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.RESTART.REQUIRED:"{#ENTITY_ID}"}=1'
+                  name: '{#FRIENDLY_NAME} needs a restart.'
+                  priority: AVERAGE
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: f3f693301c914614b09591a8ee2d5137
+          name: HA-steps
+          type: DEPENDENT
+          key: ha.steps
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_steps$'
+          item_prototypes:
+            - uuid: 00d02887e30b4deea0623ba3123a2402
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.steps[{#ENTITY_ID}]'
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: steps-taken
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 30fabe3d2c124b389841be70a0091d34
+          name: HA-storage-available
+          type: DEPENDENT
+          key: ha.storage.available
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_storage$'
+          item_prototypes:
+            - uuid: c43d89529e5247be9cd7e106fe65267a
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.storage.available[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: storage-available
+              trigger_prototypes:
+                - uuid: c59b68991b1d4109a514ea1517f05b75
+                  expression: 'last(/Home Assistant - Zabbix/ha.storage.available[{#ENTITY_ID}])<{$STORAGE_PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.STORAGE:"{#ENTITY_ID}"}=1'
+                  name: '{#FRIENDLY_NAME} Storage available: {ITEM.LASTVALUE}'
+                  priority: HIGH
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 2d75e7a360d34e27a84fee3647a6ea11
+          name: HA-swap-free
+          type: DEPENDENT
+          key: ha.swap.free
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_freier_swap$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_free$'
+          item_prototypes:
+            - uuid: 98eb39af0f724e598f8e1c25a4a9230a
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'swap.free[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: swap-free
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 1a5675c1d3814b6eac9350c27f50ca17
+          name: HA-swap-use
+          type: DEPENDENT
+          key: ha.swap.use
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_belegter_swap$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_use$'
+          item_prototypes:
+            - uuid: 91fb4d79f8c542688fa64cade28da448
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'swap.use[{#ENTITY_ID}]'
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: swap-used
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 605e4b27c5a84ed18a80d178f140fc6a
+          name: HA-switch
+          type: DEPENDENT
+          key: ha.switch
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^switch\..*'
+          item_prototypes:
+            - uuid: d4cfbdc6386d4f22aeb8c42ed89330f3
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.switch[{#ENTITY_ID}]'
+              valuemap:
+                name: switch
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '3'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: switch
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: add7045946fc474692b5265e8a3d09e7
+          name: HA-temperature
+          type: DEPENDENT
+          key: ha.temp
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^temperature$
+          item_prototypes:
+            - uuid: 2558ef69a96d4fd2a5749244be602b4c
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.i.d[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '!{#UNITS}'
+              valuemap:
+                name: temperature
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                  error_handler: DISCARD_VALUE
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: temperature
+              trigger_prototypes:
+                - uuid: 3e9a135994444d65a31290ad24f9f1cd
+                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) <= {$TRIGGER.TEMPERATURE.WARNING.LOW:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is <= {$TRIGGER.TEMPERATURE.WARNING.LOW}°C'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 5848cb142ee64ed698946f5dc1921972
+                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) >= {$TRIGGER.TEMPERATURE.WARNING.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is >= {$TRIGGER.TEMPERATURE.WARNING.HIGH}°C'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 5710805f246c4a568b451810a2b1d687
+                  expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.WARNING.HIGH:"{#ENTITY_ID}"}) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.TEMPERATURE.NORMAL.HIGH}-{$TRIGGER.TEMPERATURE.WARNING.HIGH}°C'
+                  priority: WARNING
+                  manual_close: 'YES'
+                - uuid: e5cf33abd30e47d8b3bc89386e974602
+                  expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.WARNING.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"}) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.TEMPERATURE.WARNING.LOW}-{$TRIGGER.TEMPERATURE.NORMAL.LOW}°C'
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="temperature")]'
+        - uuid: 3c25af88b40542278ed696126114e8a9
+          name: HA-update
+          type: DEPENDENT
+          key: ha.update
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_update$'
+              - macro: '{#ENTITY_ID}'
+                value: ^update.home_assistant_core_update$
+                operator: NOT_MATCHES_REGEX
+              - macro: '{#ENTITY_ID}'
+                value: ^update.home_assistant_supervisor_update$
+                operator: NOT_MATCHES_REGEX
+          item_prototypes:
+            - uuid: 5dac8c097f7142be8a3bad3c6eaf6730
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.update[{#ENTITY_ID}]'
+              trends: 730d
+              valuemap:
+                name: update
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: update-integration
+              trigger_prototypes:
+                - uuid: 335e82da8fdd4b48886ef40f19376ff6
+                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"} = 1'
+                  name: 'Home Assistant update for {#FRIENDLY_NAME} is available.'
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9599afbf77cd4b7ca988a5f64f4be9b2
+          name: HA-firmware-update
+          type: DEPENDENT
+          key: ha.update.firmware
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^firmware$
+          item_prototypes:
+            - uuid: 6f2925fe355c4ce88484c4422f548036
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.firmware[{#ENTITY_ID}]'
+              trends: 730d
+              valuemap:
+                name: firmware-update
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: update-firmware
+              trigger_prototypes:
+                - uuid: af2bebad2a344e14b0da3fb5cbd552fa
+                  expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.FIRMWARE} = 1'
+                  name: 'Firmware update for {#FRIENDLY_NAME} is available.'
+                  priority: WARNING
+                - uuid: 5e6f5ce1d4994dd3a6fccb892a93098f
+                  expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=2 and {$SWITCH.TRIGGER.FIRMWARE:"{#ENTITY_ID}"}=1'
+                  name: 'Firmware version for {#FRIENDLY_NAME} is not available'
+                  status: DISABLED
+                  discover: NO_DISCOVER
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="firmware")]'
+        - uuid: 602c093306c848698c109908cf006d8f
+          name: HA-uptime
+          type: DEPENDENT
+          key: ha.uptime
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_uptime$'
+          item_prototypes:
+            - uuid: 100fc48ad0af45fc8d9f8d0715838238
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.uptime[{#ENTITY_ID}]'
+              units: s
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      // ISO8601-Zeitstempel aus dem Log extrahieren
+                      var regex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2})/;
+                      var match = value.match(regex);
+                      
+                      if (match && match[1]) {
+                          var logTime = Date.parse(match[1]); // ergibt Millisekunden
+                          var now = Date.now(); // aktuelle Zeit in Millisekunden
+                          if (!isNaN(logTime)) {
+                              var diffSeconds = Math.floor((now - logTime) / 1000);
+                              return diffSeconds;
+                          }
+                      }
+                      
+                      return 0;
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: uptime
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: fbdcf1e77ce040e884c07c0575c00bc1
+          name: HA-VOC
+          type: DEPENDENT
+          key: ha.voc
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*voc_index$'
+          item_prototypes:
+            - uuid: 175c97dc67624dfca35b258d007e325f
+              name: 'Pollutants indoor air {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.pollutants[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: pollutants-indoor-air
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: fc4a057c0e43436a85d0d5e54046cfa5
+          name: HA-watt
+          type: DEPENDENT
+          key: ha.watt
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^power$
+          item_prototypes:
+            - uuid: 6c22e4450da24006a916a07822cdd3a2
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.watt[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: Watt
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="power")]'
+        - uuid: 6e09cf205b9848b3be6fdab4c965e384
+          name: HA-weight
+          type: DEPENDENT
+          key: ha.weight
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^weight$
+          item_prototypes:
+            - uuid: b62407f2989b4bf782026f62cfd290b6
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.weight[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: '0'
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id==''{#ENTITY_ID}'')].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: weight
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.attributes.device_class=="weight")]'
+        - uuid: 7ea5a0ffc5bb41e5add47d94a50bbd58
+          name: HA-zone
+          type: DEPENDENT
+          key: ha.zone
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^zone\..*'
+          item_prototypes:
+            - uuid: 76f550c09ea84e63984f91cfec099fb8
+              name: 'Latitude of {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.zone.latitude[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: zone-latitude
+            - uuid: 7295e5079a4f4a7480e71c65ba4498fe
+              name: 'Longitude of {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.zone.longitude[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: zone-longitude
+            - uuid: 0b6de633ef3d4762912817533aae321b
+              name: 'Radius of zone {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.zone.radius[{#ENTITY_ID}]'
+              value_type: FLOAT
+              trends: 730d
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.radius.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: zone-radius
+            - uuid: 871864cc5c8d4daaac3df7047310b203
+              name: 'People in the zone {#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ha.zone.zone-assignment[{#ENTITY_ID}]'
+              history: 730d
+              value_type: TEXT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.persons.first()'
+                - type: LTRIM
+                  parameters:
+                    - ' person.'
+                - type: STR_REPLACE
+                  parameters:
+                    - '"'
+                    - ' '
+                - type: STR_REPLACE
+                  parameters:
+                    - ' person.'
+                    - ' '
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: zone-assignment
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 6113367df4b84129a1848d3ce9293bcd
+          name: HA-swap-use-percent
+          type: DEPENDENT
+          key: swap.use.percent
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_auslastung$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_use_percent$'
+          item_prototypes:
+            - uuid: 9afa6e0443dc4d7ebd0f875d6ab05f47
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'swap.use.percent[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: swap-utilization
+              trigger_prototypes:
+                - uuid: 18016074c670410a99f76bcb7bd21f4b
+                  expression: 'min(/Home Assistant - Zabbix/swap.use.percent[{#ENTITY_ID}],5m)>{$SWAP.PFREE.MIN.WARN.PERCENT}'
+                  name: 'High swap utilization (over {$SWAP.PFREE.MIN.WARN.PERCENT}% for 5m)'
+                  opdata: 'Swap utilization: {ITEM.LASTVALUE}%'
+                  priority: WARNING
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: c0d40dc4a9ed4bcb83b8639efe3437cb
+          name: HA-load.average.1m
+          type: DEPENDENT
+          key: systemmonitor.load.average.1m
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_last_1_min$
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_load_1_min$
+          item_prototypes:
+            - uuid: ac226265e61b4e73b3714357c6d5aa43
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'average.last.1.min[{#ENTITY_ID}]'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: load-average-1m
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: fb4c3de04695495996282cfc788a6bdb
+          name: HA-load.average.5m
+          type: DEPENDENT
+          key: systemmonitor.load.average.5m
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_last_5_min$
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_load_5_min$
+          item_prototypes:
+            - uuid: 3c4dd05201ab442a8a7ed8ee8cc4e6b0
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'average.last.5.min[{#ENTITY_ID}]'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: load-average-5m
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 71855f2315374a4cb05b9da3a1472f6e
+          name: HA-load.average.15m
+          type: DEPENDENT
+          key: systemmonitor.load.average.15m
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_last_15_min$
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_load_15_min$
+          item_prototypes:
+            - uuid: a1ac1aa84d5b421c8ba68ffe459d40a3
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'average.last.15.min[{#ENTITY_ID}]'
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: load-average-15m
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 02f25e2e62064d6d8373e61982280550
+          name: HA-network.in
+          type: DEPENDENT
+          key: systemmonitor.network.in
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_in_.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_eingehender_netzwerkdurchsatz_.*$'
+          item_prototypes:
+            - uuid: ab7d2ca271954f5e9f39a6c0006a9e49
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.in[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-in
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 5e47c22028da4c40aa22c82ac037bead
+          name: HA-network.out
+          type: DEPENDENT
+          key: systemmonitor.network.out
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_out_.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_ausgehender_netzwerkdurchsatz_.*$'
+          item_prototypes:
+            - uuid: a86d7870643c4b228a69feeb20643fda
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.out[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-out
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: bf21644d65f54d3b884173e27fac9b71
+          name: HA-network.packages.in
+          type: DEPENDENT
+          key: systemmonitor.network.packages.in
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_in_packets_.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_eingehende_pakete_.*$'
+          item_prototypes:
+            - uuid: 85f5b56a13e440e6a60eeeb3ea74ad52
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.packages.in[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '!Pkts'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-packages-out
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 387a3f557645464eb4261afee33d1cbc
+          name: HA-network.packages.out
+          type: DEPENDENT
+          key: systemmonitor.network.packages.out
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_out_packets_.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_ausgehende_pakete_.*$'
+          item_prototypes:
+            - uuid: 44bc8de1d302411dbdcf7652a33163ee
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.packages.out[{#ENTITY_ID}]'
+              value_type: FLOAT
+              units: '!Pkts'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-packages-in
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: homeassistant
+      macros:
+        - macro: '{$API.TOKEN}'
+        - macro: '{$BATTERY.MINIMUM}'
+          value: '30'
+          description: 'The trigger activates when the battery drops below 30%.'
+        - macro: '{$BATTERY_TRIGGER_TIMEOUT}'
+          value: '900'
+          description: 'Duration the entity must stay “unavailable” before the trigger fires.'
+        - macro: '{$CPU.UTIL.MAX.PERCENT}'
+          value: '90'
+          description: 'Maximum CPU utilization'
+        - macro: '{$DBM.SIGNAL.MINIMUM}'
+          value: '-80'
+        - macro: '{$DISK.PFREE.MIN.WARN.GIB}'
+          value: '2'
+          description: 'Minimum disk space free'
+        - macro: '{$HA.URL}'
+          value: 'http://192.168.10.121:8123'
+          description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
+        - macro: '{$HOST.REACHABLE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$MEMORY.UTIL.MAX.PERCENT}'
+          value: '95'
+          description: 'Maximum memory load'
+        - macro: '{$STORAGE_PERCENT}'
+          value: '5'
+          description: 'the threshold from which the storage trigger is activated'
+        - macro: '{$SWAP.PFREE.MIN.WARN.PERCENT}'
+          value: '50'
+        - macro: '{$SWITCH.TRIGGER.BATTERY}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.BATTERY.UNAVAILABLE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.FIRMWARE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.HA_UPDATE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.HUMIDITY}'
+          value: '0'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.RESTART.REQUIRED}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.STORAGE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.TEMPERATURE}'
+          value: '0'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.ZIGBEE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$TRIGGER.HUMIDITY.CRITICAL.HIGH}'
+          value: '100'
+        - macro: '{$TRIGGER.HUMIDITY.CRITICAL.LOW}'
+          value: '0'
+          description: 'Critical low threshold – humidity at or below this value is considered dangerous (too dry, risk of electrostatic discharge and hardware issues).'
+        - macro: '{$TRIGGER.HUMIDITY.NORMAL.HIGH}'
+          value: '60'
+          description: 'Normal operating upper limit – humidity at or below this value down to NORMAL.LOW is considered safe.'
+        - macro: '{$TRIGGER.HUMIDITY.NORMAL.LOW}'
+          value: '40'
+          description: 'Normal operating lower limit – humidity at or above this value up to NORMAL.HIGH is considered safe.'
+        - macro: '{$TRIGGER.HUMIDITY.WARNING.HIGH}'
+          value: '70'
+          description: 'Warning high threshold – humidity between NORMAL.HIGH and this value is a warning zone (too humid, but not yet critical).'
+        - macro: '{$TRIGGER.HUMIDITY.WARNING.LOW}'
+          value: '30'
+          description: 'Warning low threshold – humidity between Critical Low and this value is a warning zone (too dry, but not yet critical).'
+        - macro: '{$TRIGGER.TEMPERATURE.CRITICAL.HIGH}'
+          value: '35'
+          description: 'Critical high threshold – temperature at or above this value is considered dangerous (overheating, risk of hardware damage).'
+        - macro: '{$TRIGGER.TEMPERATURE.CRITICAL.LOW}'
+          value: '12'
+          description: 'Critical low threshold – temperature below this value is considered dangerous (too cold, condensation and hardware reliability issues).'
+        - macro: '{$TRIGGER.TEMPERATURE.NORMAL.HIGH}'
+          value: '27'
+          description: 'Normal operating upper limit – temperatures at or below this value down to NORMAL.LOW are considered safe.'
+        - macro: '{$TRIGGER.TEMPERATURE.NORMAL.LOW}'
+          value: '18'
+          description: 'Normal operating lower limit – temperatures at or above this value up to NORMAL.HIGH are considered safe.'
+        - macro: '{$TRIGGER.TEMPERATURE.WARNING.HIGH}'
+          value: '31'
+          description: 'Warning high threshold – temperature between NORMAL.HIGH and this value is a warning zone (too hot, but not yet critical).'
+        - macro: '{$TRIGGER.TEMPERATURE.WARNING.LOW}'
+          value: '15'
+          description: 'Warning low threshold – temperature between Critical Low and this value is a warning zone (too cold, but not yet critical).'
+        - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
+          value: '20'
+        - macro: '{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT}'
+          value: '300'
+      valuemaps:
+        - uuid: c28449cb387847f193c54d0d8a17af2a
+          name: automation
+          mappings:
+            - value: '1'
+              newvalue: enabled
+            - value: '0'
+              newvalue: disabled
+            - value: '2'
+              newvalue: unavailable
+        - uuid: 4b75eda308a340bf95802bef3f0c83a1
+          name: backup_manager
+          mappings:
+            - value: '0'
+              newvalue: Idle
+            - value: '1'
+              newvalue: 'Creating a backup'
+            - value: '2'
+              newvalue: 'Receiving a backup'
+            - value: '3'
+              newvalue: 'Restoring a backup'
+            - value: '4'
+              newvalue: Blocked
+        - uuid: db49fc3ee0ff42a786b3f7b4788c2f8e
+          name: battery
+          mappings:
+            - value: '-1'
+              newvalue: unavailable
+        - uuid: ddfc94f3fbd2450c8d4c7a899d3cb762
+          name: camera
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: idle
+        - uuid: bf19987c86b145b78bec89922414d14b
+          name: contact-sensot
+          mappings:
+            - value: '0'
+              newvalue: closed
+            - value: '1'
+              newvalue: open
+        - uuid: ebd5ee8fee83493b86533809ed4ef154
+          name: dbm
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+        - uuid: 9aeb4203ebeb42928e007cef7119aa71
+          name: distance
+          mappings:
+            - value: '-1'
+              newvalue: unknown
+            - value: '-2'
+              newvalue: unavailable
+        - uuid: 1d58a8a0ed23468bb6a4b0a43d8136c1
+          name: firmware-update
+          mappings:
+            - value: '0'
+              newvalue: 'no update available'
+            - value: '1'
+              newvalue: 'an update is available'
+            - value: '2'
+              newvalue: 'firmware version unavailable'
+        - uuid: fa6c7bcd85894c288366162da5008a6a
+          name: kWh
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+        - uuid: 8e1635c4d58a424f8efe835c08182b9c
+          name: light
+          mappings:
+            - value: '1'
+              newvalue: 'on'
+            - value: '0'
+              newvalue: 'off'
+            - value: '2'
+              newvalue: unavailable
+        - uuid: 2ae0524e49604511b4fb308af3c2d3eb
+          name: network
+          mappings:
+            - value: '0'
+              newvalue: unknown
+        - uuid: fa7b684ec0924e9a84d43408464e5153
+          name: occupancy
+          mappings:
+            - value: '1'
+              newvalue: 'on'
+            - value: '0'
+              newvalue: 'off'
+        - uuid: 1a68bde5208c4786b5894683d0e8a50c
+          name: 'restart required'
+          mappings:
+            - value: '1'
+              newvalue: 'restart required'
+            - value: '0'
+              newvalue: 'restart not required'
+            - value: '2'
+              newvalue: 'restart status unknown'
+            - value: '3'
+              newvalue: 'not reachable'
+        - uuid: 7da1ebf0c4f44578b588dd2e6e5e7840
+          name: switch
+          mappings:
+            - value: '1'
+              newvalue: 'on'
+            - value: '0'
+              newvalue: 'off'
+            - value: '2'
+              newvalue: unavailable
+            - value: '3'
+              newvalue: unknown
+        - uuid: 073e5b320d2144feafb13f2d4cf9dbf2
+          name: temperature
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+            - value: '-1'
+              newvalue: unknown
+        - uuid: c248dc2af0544701a89f82fa5aec1eac
+          name: update
+          mappings:
+            - value: '0'
+              newvalue: 'no update available'
+            - value: '1'
+              newvalue: 'an update is available'
+            - value: '2'
+              newvalue: 'update state unavailable (not HAOS)'
+        - uuid: 489366a67f234d188303cdac90909384
+          name: weather
+          mappings:
+            - value: '1'
+              newvalue: clear-night
+            - value: '2'
+              newvalue: cloudy
+            - value: '3'
+              newvalue: fog
+            - value: '4'
+              newvalue: hail
+            - value: '5'
+              newvalue: lightning
+            - value: '6'
+              newvalue: lightning-rainy
+            - value: '7'
+              newvalue: partly2
+            - value: '8'
+              newvalue: pouring
+            - value: '9'
+              newvalue: rainy
+            - value: '10'
+              newvalue: snowy
+            - value: '11'
+              newvalue: snowy-rainy
+            - value: '12'
+              newvalue: sunny
+            - value: '13'
+              newvalue: windy
+            - value: '14'
+              newvalue: windy-variant
+            - value: '15'
+              newvalue: exception

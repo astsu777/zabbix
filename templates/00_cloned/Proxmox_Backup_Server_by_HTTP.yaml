@@ -1,0 +1,495 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: f10fc491a20f4d0983147fe4c6d7c361
+      name: Templates
+  templates:
+    - uuid: cefb706d7d4f4de296f8625d1659c3f4
+      template: 'Proxmox Backup Server by HTTP'
+      name: 'Proxmox Backup Server by HTTP'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 36f8f900be744f29b2d049239b0b4d44
+          name: 'PBS Node: cpu usage'
+          type: DEPENDENT
+          key: pbs.node.cpu
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.cpu
+            - type: MULTIPLIER
+              parameters:
+                - '100'
+          master_item:
+            key: pbs.node.status
+          triggers:
+            - uuid: 8a3741ba89254663af5417645a1378d6
+              expression: 'last(/Proxmox Backup Server by HTTP/pbs.node.cpu)>{$PBS.CPU.PUSE.MAX.WARN}'
+              name: 'PBS: Node high cpu usage'
+              event_name: 'PBS: Node high cpu usage (over {$PBS.CPU.PUSE.MAX.WARN} use)'
+              opdata: 'Current use: {ITEM.LASTVALUE1} of {ITEM.LASTVALUE2}'
+              priority: AVERAGE
+              description: 'CPU usage.'
+        - uuid: 4f78db2bd588423294ff99218428ace8
+          name: 'PBS Node: kernel'
+          type: DEPENDENT
+          key: pbs.node.kversion
+          history: 90d
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.kversion
+          master_item:
+            key: pbs.node.status
+        - uuid: c99e8ceeb44744bd981e0a2281eb9ebf
+          name: 'PBS Node: memory'
+          type: DEPENDENT
+          key: pbs.node.memory
+          history: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.memory
+          master_item:
+            key: pbs.node.status
+        - uuid: aa044ef7b4c84ff98f01ea282552c5af
+          name: 'PBS Node: memory free'
+          type: DEPENDENT
+          key: pbs.node.memory.free
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.free
+          master_item:
+            key: pbs.node.memory
+        - uuid: fa4961008de349b3bceaa215fc4f9726
+          name: 'PBS Node: memory used percent'
+          type: CALCULATED
+          key: pbs.node.memory.pused
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          params: 'last(//pbs.node.memory.used) / last(//pbs.node.memory.total) * 100'
+          triggers:
+            - uuid: 63f5204aabf74ce698755dc7f9a9f003
+              expression: 'last(/Proxmox Backup Server by HTTP/pbs.node.memory.pused)>{$PBS.MEMORY.PUSE.MAX.WARN}'
+              name: 'PBS: Node high memory usage'
+              event_name: 'PBS: Node high memory usage (over {$PBS.MEMORY.PUSE.MAX.WARN} use)'
+              opdata: 'Current use: {ITEM.LASTVALUE1} of {ITEM.LASTVALUE2}'
+              priority: AVERAGE
+              description: 'Memory usage.'
+        - uuid: 5c61522ecd2c4eefb8b7995212d7822e
+          name: 'PBS Node: memory total'
+          type: DEPENDENT
+          key: pbs.node.memory.total
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.total
+          master_item:
+            key: pbs.node.memory
+        - uuid: 642fde856ff74960abcbbb0a6af39b56
+          name: 'PBS Node: memory used'
+          type: DEPENDENT
+          key: pbs.node.memory.used
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.used
+          master_item:
+            key: pbs.node.memory
+        - uuid: 60b3cccf64d943ac97134ecd9f6ab814
+          name: 'PBS Node: root'
+          type: DEPENDENT
+          key: pbs.node.root
+          history: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.root
+          master_item:
+            key: pbs.node.status
+        - uuid: 2a09b6b9095c44979888e63a81f519ec
+          name: 'PBS Node: root avail'
+          type: DEPENDENT
+          key: pbs.node.root.avail
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.avail
+          master_item:
+            key: pbs.node.root
+        - uuid: 266ffdfd8e9f4aa6904327257fba8df4
+          name: 'PBS Node: root used percent'
+          type: CALCULATED
+          key: pbs.node.root.pused
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          params: 'last(//pbs.node.root.used) / last(//pbs.node.root.total) * 100'
+          triggers:
+            - uuid: 03e7ed5d521240d7bf6640131bcbceae
+              expression: 'last(/Proxmox Backup Server by HTTP/pbs.node.root.pused)>{$PBS.ROOT.PUSE.MAX.WARN}'
+              name: 'PBS: Node high root usage'
+              event_name: 'PBS: Node high root usage (over {$PBS.ROOT.PUSE.MAX.WARN} use)'
+              opdata: 'Current use: {ITEM.LASTVALUE1} of {ITEM.LASTVALUE2}'
+              priority: AVERAGE
+              description: 'Root usage.'
+        - uuid: e4873b60aeb243f0b964f862a700fc66
+          name: 'PBS Node: root total'
+          type: DEPENDENT
+          key: pbs.node.root.total
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.total
+          master_item:
+            key: pbs.node.root
+        - uuid: 75fcaaea9a8840caaf1abc584357d413
+          name: 'PBS Node: root used'
+          type: DEPENDENT
+          key: pbs.node.root.used
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.used
+          master_item:
+            key: pbs.node.root
+        - uuid: 3e28910e47a7452abafc43f8ed5b3c5d
+          name: 'PBS: Node status'
+          type: HTTP_AGENT
+          key: pbs.node.status
+          history: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data
+          timeout: 10s
+          url: 'https://{HOST.CONN}:{$PBS.URL.PORT}/api2/json/nodes/{$PBS.NODE.NAME}/status'
+          headers:
+            - name: Authorization
+              value: 'PBSAPIToken={$PBS.TOKEN.ID}:{$PBS.TOKEN.SECRET}'
+        - uuid: 0ed05a2ff16a4b819a8b541dfd8514a3
+          name: 'PBS Node: swap'
+          type: DEPENDENT
+          key: pbs.node.swap
+          history: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.swap
+          master_item:
+            key: pbs.node.status
+        - uuid: 0240db907adf4a038673f8ac58818976
+          name: 'PBS Node: swap free'
+          type: DEPENDENT
+          key: pbs.node.swap.free
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.free
+          master_item:
+            key: pbs.node.swap
+        - uuid: 8377a9254d9b4471bddaf2b674852dfc
+          name: 'PBS Node: swap used percent'
+          type: CALCULATED
+          key: pbs.node.swap.pused
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          params: 'last(//pbs.node.swap.used) / last(//pbs.node.swap.total) * 100'
+          triggers:
+            - uuid: a98c2f3d8c9642218891c88115159ccf
+              expression: 'last(/Proxmox Backup Server by HTTP/pbs.node.swap.pused)>{$PBS.SWAP.PUSE.MAX.WARN}'
+              name: 'PBS: Node high swap usage'
+              event_name: 'PBS: Node high swap usage (over {$PBS.SWAP.PUSE.MAX.WARN} use)'
+              opdata: 'Current use: {ITEM.LASTVALUE1} of {ITEM.LASTVALUE2}'
+              priority: AVERAGE
+              description: 'Swap usage.'
+        - uuid: a66805c248a14caab94a964a2b78d927
+          name: 'PBS Node: swap total'
+          type: DEPENDENT
+          key: pbs.node.swap.total
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.total
+          master_item:
+            key: pbs.node.swap
+        - uuid: a6aca82329f14c60b77bd9fea5f0ed9d
+          name: 'PBS Node: swap used'
+          type: DEPENDENT
+          key: pbs.node.swap.used
+          history: 90d
+          units: B
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.used
+          master_item:
+            key: pbs.node.swap
+        - uuid: f9ccd593f2c64b479ac3c1f1133c1c06
+          name: 'PBS Node: uptime'
+          type: DEPENDENT
+          key: pbs.node.uptime
+          history: 90d
+          units: s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.uptime
+          master_item:
+            key: pbs.node.status
+        - uuid: 763bcfe396dc4c46a00bd1be63c8e01a
+          name: 'PBS: API Ping'
+          type: HTTP_AGENT
+          key: pbs.ping
+          history: 90d
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.pong
+            - type: BOOL_TO_DECIMAL
+          timeout: 30s
+          url: 'https://{HOST.CONN}:{$PBS.URL.PORT}/api2/json/ping'
+          headers:
+            - name: Authorization
+              value: 'PBSAPIToken={$PBS.TOKEN.ID}:{$PBS.TOKEN.SECRET}'
+          triggers:
+            - uuid: fa4712f5c6a443f2b9609bba486997e2
+              expression: 'last(/Proxmox Backup Server by HTTP/pbs.ping)<>1'
+              name: 'PBS: API service not available'
+              priority: HIGH
+              description: 'The API service is not available. Check your network and authorization settings.'
+        - uuid: 2a6ef108567f423ab970b4534af45a95
+          name: 'PBS: Datastores usage'
+          type: HTTP_AGENT
+          key: pbs.status.datastore-usage
+          history: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data
+          timeout: 10s
+          url: 'https://{HOST.CONN}:{$PBS.URL.PORT}/api2/json/status/datastore-usage'
+          headers:
+            - name: Authorization
+              value: 'PBSAPIToken={$PBS.TOKEN.ID}:{$PBS.TOKEN.SECRET}'
+        - uuid: f4b1d0799fbd445295a883ca9e9e9bbb
+          name: 'PBS: Failed tasks'
+          type: HTTP_AGENT
+          key: pbs.tasks.failed
+          history: '0'
+          value_type: TEXT
+          timeout: 10s
+          url: 'https://{HOST.CONN}:{$PBS.URL.PORT}/api2/json/nodes/{$PBS.NODE.NAME}/tasks'
+          query_fields:
+            - name: errors
+              value: 'true'
+            - name: limit
+              value: '0'
+          headers:
+            - name: Authorization
+              value: 'PBSAPIToken={$PBS.TOKEN.ID}:{$PBS.TOKEN.SECRET}'
+        - uuid: 5d95a0faaf1f4ec7832254f256b97020
+          name: 'PBS: Failed backup tasks count'
+          type: DEPENDENT
+          key: pbs.tasks.failed.count_backup
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data[?(@.worker_type == "backup")].length()'
+          master_item:
+            key: pbs.tasks.failed
+        - uuid: 41070205047640dcb5fbe7f9c5bb0012
+          name: 'PBS: Last failed backup task'
+          type: DEPENDENT
+          key: pbs.tasks.failed.last_backup
+          history: 90d
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data[?(@.worker_type == "backup")].first()'
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '300'
+          master_item:
+            key: pbs.tasks.failed
+        - uuid: f96b4001dcf4422bb939e554749d850c
+          name: 'PBS: Last failed backup task time'
+          type: DEPENDENT
+          key: pbs.tasks.failed.last_backup_time
+          history: 90d
+          units: unixtime
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data[?(@.worker_type == "backup")].first()'
+            - type: JSONPATH
+              parameters:
+                - $.endtime
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - '300'
+          master_item:
+            key: pbs.tasks.failed
+        - uuid: 79b5d9771bf445d0a42a1bb2162829aa
+          name: 'PBS: Version'
+          type: HTTP_AGENT
+          key: pbs.version
+          history: 90d
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.version
+          timeout: 30s
+          url: 'https://{HOST.CONN}:{$PBS.URL.PORT}/api2/json/version'
+          headers:
+            - name: Authorization
+              value: 'PBSAPIToken={$PBS.TOKEN.ID}:{$PBS.TOKEN.SECRET}'
+      discovery_rules:
+        - uuid: 62118080f8f94295843949d200b2c126
+          name: 'PBS Datastore discovery'
+          type: DEPENDENT
+          key: pbs.datastore
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 92e0994544264222834ec669ea73617b
+              name: 'PBS Datastore: {#DATASTORE} avail'
+              type: DEPENDENT
+              key: 'pbs.datastore.avail[{#DATASTORE}]'
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.avail
+              master_item:
+                key: 'pbs.datastore[{#DATASTORE}]'
+            - uuid: f7aca8afb5244059be385008546fee6c
+              name: 'PBS Datastore: {#DATASTORE} used percent'
+              type: CALCULATED
+              key: 'pbs.datastore.pused[{#DATASTORE}]'
+              value_type: FLOAT
+              units: '%'
+              params: 'last(//pbs.datastore.used[{#DATASTORE}]) / last(//pbs.datastore.total[{#DATASTORE}]) * 100'
+              trigger_prototypes:
+                - uuid: 3ca6b5d574c144e7bc39948b98dc305f
+                  expression: 'last(/Proxmox Backup Server by HTTP/pbs.datastore.pused[{#DATASTORE}])>{$PBS.STORAGE.PUSE.MAX.WARN}'
+                  name: 'PBS Datastore: {#DATASTORE} high usage'
+                  event_name: 'PBS Datastore: {#DATASTORE} high usage (over {$PBS.STORAGE.PUSE.MAX.WARN} use)'
+                  priority: AVERAGE
+                  description: 'Datastore {#DATASTORE} usage'
+            - uuid: fc2df1e12bf645ce928ab6fca806c2f9
+              name: 'PBS Datastore: {#DATASTORE} total'
+              type: DEPENDENT
+              key: 'pbs.datastore.total[{#DATASTORE}]'
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.total
+              master_item:
+                key: 'pbs.datastore[{#DATASTORE}]'
+            - uuid: 3ebe3328c95d4e56a96b38e38ba0f0c8
+              name: 'PBS Datastore: {#DATASTORE} used'
+              type: DEPENDENT
+              key: 'pbs.datastore.used[{#DATASTORE}]'
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.used
+              master_item:
+                key: 'pbs.datastore[{#DATASTORE}]'
+            - uuid: d08b9aef6fd74d64a9659e1758f43251
+              name: 'PBS Datastore: {#DATASTORE}'
+              type: DEPENDENT
+              key: 'pbs.datastore[{#DATASTORE}]'
+              history: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[?(@.store == ''{#DATASTORE}'')]'
+                - type: JSONPATH
+                  parameters:
+                    - '$.[0]'
+              master_item:
+                key: pbs.status.datastore-usage
+          master_item:
+            key: pbs.status.datastore-usage
+          lld_macro_paths:
+            - lld_macro: '{#DATASTORE}'
+              path: $.store
+      tags:
+        - tag: class
+          value: software
+        - tag: target
+          value: proxmox-pbs
+      macros:
+        - macro: '{$PBS.CPU.PUSE.MAX.WARN}'
+          value: '90'
+          description: 'Maximum used CPU in percentage.'
+        - macro: '{$PBS.MEMORY.PUSE.MAX.WARN}'
+          value: '90'
+          description: 'Maximum used memory in percentage.'
+        - macro: '{$PBS.NODE.NAME}'
+          value: localhost
+          description: 'Internal node name of PBS for API. Not used as https host.'
+        - macro: '{$PBS.ROOT.PUSE.MAX.WARN}'
+          value: '90'
+          description: 'Maximum used root space in percentage.'
+        - macro: '{$PBS.STORAGE.PUSE.MAX.WARN}'
+          value: '90'
+          description: 'Maximum used storage space in percentage.'
+        - macro: '{$PBS.SWAP.PUSE.MAX.WARN}'
+          value: '90'
+          description: 'Maximum used swap in percentage.'
+        - macro: '{$PBS.TOKEN.ID}'
+          value: USER@REALM!TOKENID
+          description: 'API tokens allow stateless access to most parts of the REST API by another system, software or API client.'
+        - macro: '{$PBS.TOKEN.SECRET}'
+          value: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+          description: 'Secret key.'
+        - macro: '{$PBS.URL.PORT}'
+          value: '8007'
+          description: 'The API uses the HTTPS protocol and the server listens to port 8007 by default.'
+  triggers:
+    - uuid: 4780a9381c494466b20d0b5f33243731
+      expression: 'change(/Proxmox Backup Server by HTTP/pbs.tasks.failed.last_backup)<>0 and (now() - last(/Proxmox Backup Server by HTTP/pbs.tasks.failed.last_backup_time) < 86400)'
+      recovery_mode: RECOVERY_EXPRESSION
+      recovery_expression: 'change(/Proxmox Backup Server by HTTP/pbs.tasks.failed.last_backup)=0 and (now() - last(/Proxmox Backup Server by HTTP/pbs.tasks.failed.last_backup_time) > 86400)'
+      name: 'PBS: New failed backup task'
+      priority: AVERAGE
+      manual_close: 'YES'
