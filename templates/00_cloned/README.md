@@ -15,6 +15,7 @@ The modifications in this template are related to decrease the severity of two t
 The following triggers have been modified::
 
 |Name|Description|Key|Severity|
+|----|-----------|---|--------|
 |Linux: Number of installed packages has been changed|-|-|From WARNING to INFO|
 |Linux: {HOST.NAME} has been restarted|-|-|From WARNING to INFO|
 
@@ -28,14 +29,16 @@ The modifications in this template have been in order to avoid *Zabbix* discover
 The following macros have been added at the template level:
 
 |Name|Description|Value|
-|{$LXC.NAME.NOT_MATCHES}|Do not discover LXCs with the following names|^(?:LAB.*|lab.*|template.*|TEMPLATE.*)$|
-|{$QEMU.NAME.NOT_MATCHES}|Do not discover VMs with the following names|^(?:LAB.*|lab.*|template.*|TEMPLATE.*)$|
+|----|-----------|-----|
+|{$LXC.NAME.NOT_MATCHES}|Do not discover LXCs with the following names|^(?:LAB.*\|lab.*\|template.*\|TEMPLATE.*)$|
+|{$QEMU.NAME.NOT_MATCHES}|Do not discover VMs with the following names|^(?:LAB.*\|lab.*\|template.*\|TEMPLATE.*)$|
 
 ### Discovery Rules
 
 In order to use the above macros, the following discovery rules have been modified:
 
 |Name|Label Macro|Operator|Regular Expression|
+|----|-----------|--------|------------------|
 |LXC discovery|{#LXC.NAME}|does not match|{$LXC.NAME.NOT_MATCHES}|
 |QEMU discovery|{#QEMU.NAME}|does not match|{$QEMU.NAME.NOT_MATCHES}|
 
