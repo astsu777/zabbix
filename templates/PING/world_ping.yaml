@@ -12,10 +12,9 @@ zabbix_export:
         ## Setup
 
         Set `Threshold of ICMP packet loss` and `Threshold of the average ICMP response`
-
       vendor:
         name: astsu777
-        version: 1.0.0
+        version: 1.0.1
       groups:
         - name: Templates
       items:
@@ -382,6 +381,24 @@ zabbix_export:
         - macro: '{$ZA_TARGET}'
           value: www.naspers.com
           description: 'Server located in South Africa'
+      dashboards:
+        - uuid: 780328254a034d2aa7811afdbee85496
+          name: 'Internet Latency'
+          pages:
+            - widgets:
+                - type: graph
+                  name: 'World Regions'
+                  width: '72'
+                  height: '12'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'World Ping'
+                        name: 'Internet Latency'
+                    - type: STRING
+                      name: reference
+                      value: NFTCO
       valuemaps:
         - uuid: 7f9c49c4e3d247269743b66442d1f938
           name: 'Service state'
