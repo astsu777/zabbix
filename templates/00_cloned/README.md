@@ -30,8 +30,8 @@ The following macros have been added at the template level:
 
 |Name|Description|Value|
 |----|-----------|-----|
-|{$LXC.NAME.NOT_MATCHES}|Do not discover LXCs with the following names|^(?:LAB.*\|lab.*\|template.*\|TEMPLATE.*)$|
-|{$QEMU.NAME.NOT_MATCHES}|Do not discover VMs with the following names|^(?:LAB.*\|lab.*\|template.*\|TEMPLATE.*)$|
+|{$LXC.NAME.NOT_MATCHES}|Do not discover LXCs with the following names|^(?:LAB.\*\|lab.\*\|template.\*\|TEMPLATE.\*)$|
+|{$QEMU.NAME.NOT_MATCHES}|Do not discover VMs with the following names|^(?:LAB.\*\|lab.\*\|template.\*\|TEMPLATE.\*)$|
 
 ### Discovery Rules
 
