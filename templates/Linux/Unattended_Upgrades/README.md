@@ -54,7 +54,8 @@ The following trigger prototype is configured:
 |Remove-Unused-Dependencies is not enabled in /etc/apt/apt.conf.d/50unattended-upgrades|-|last(/Linux Unattended Upgrades/vfs.file.regmatch[/etc/apt/apt.conf.d/50unattended-upgrades,Unattended-Upgrade\:\:Remove-Unused-Dependencies\s+\"true\"\;,UTF8,,])=0|Warning|
 |The host needs to be restarted|-|avg(/Linux Unattended Upgrades/vfs.file.exists[/var/run/reboot-required],24h)=1|Information|
 |Unattended-upgrades package is not installed|-|last(/Linux Unattended Upgrades/vfs.file.exists[/usr/bin/unattended-upgrade])=0|Warning|
-|Updates have been installed|-|last(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log,^Log\sstarted.*(\R.*?)+ended\:.(\d{4}-\d{2}-\d{2}\s+.\d{2}\:\d{2}:\d{2}),UTF8,20,,,],#1:now-1d)<>0|Information|
+|Updates are available|-|find(/Linux Unattended Upgrades/system.run[/usr/bin/apt list --upgradable 2>/dev/null],,"like","upgradable from")=1|Information|
+|Updates have been installed|-|nodata(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log],1d)=0|Information|
 
 ## Graphs
 

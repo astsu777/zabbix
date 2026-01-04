@@ -10,14 +10,14 @@ zabbix_export:
       description: 'Monitor unattended upgrades on Debian based distributions.'
       vendor:
         name: astsu777
-        version: 1.0.0
+        version: 1.0.1
       groups:
         - name: Templates
       items:
         - uuid: baf772be11f248568cedd6f036c76fbb
           name: 'Log: Installed Upgrades'
           type: ZABBIX_ACTIVE
-          key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log,^Log\sstarted.*(\R.*?)+ended\:.(\d{4}-\d{2}-\d{2}\s+.\d{2}\:\d{2}:\d{2}),UTF8,20,,,]'
+          key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log]'
           delay: 10m
           history: 5d
           value_type: LOG
@@ -28,7 +28,7 @@ zabbix_export:
               value: 'Unattended Upgrades'
           triggers:
             - uuid: 5ee7637ae0a048609e56374659cc2b06
-              expression: 'last(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log,^Log\sstarted.*(\R.*?)+ended\:.(\d{4}-\d{2}-\d{2}\s+.\d{2}\:\d{2}:\d{2}),UTF8,20,,,],#1:now-1d)<>0'
+              expression: 'nodata(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log],1d)=0'
               name: 'Updates have been installed'
               priority: INFO
               tags:
@@ -37,7 +37,7 @@ zabbix_export:
         - uuid: 108274a683024917bd668537d5617410
           name: 'Log: Unattended-Upgrades'
           type: ZABBIX_ACTIVE
-          key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades.log,,UTF8,20,,,]'
+          key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades.log]'
           delay: 30m
           history: 5d
           value_type: LOG
@@ -48,7 +48,7 @@ zabbix_export:
               value: 'Unattended Upgrades'
           triggers:
             - uuid: dfe80578bace44a3a9bb6d5cec03c9f0
-              expression: 'find(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades.log,,UTF8,20,,,],,"like","ERROR")=1'
+              expression: 'find(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades.log],,"like","ERROR")=1'
               name: 'Error {ITEM.LASTVALUE} when installing unattended-upgrades'
               priority: AVERAGE
               description: |
@@ -67,6 +67,14 @@ zabbix_export:
           tags:
             - tag: Application
               value: 'Unattended Upgrades'
+          triggers:
+            - uuid: eb82d603b480493cab79f045f6927202
+              expression: 'find(/Linux Unattended Upgrades/system.run[/usr/bin/apt list --upgradable 2>/dev/null],,"like","upgradable from")=1'
+              name: 'Updates are available'
+              priority: INFO
+              tags:
+                - tag: Application
+                  value: Unattended-Upgrades
         - uuid: 71d1cc0a6a27497b9fcf9de2ef288a94
           name: 'Ubuntu Server Metapackage'
           key: 'system.run[/usr/bin/tasksel --list-tasks | /bin/grep ''Basic Ubuntu server'']'
