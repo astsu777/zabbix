@@ -119,8 +119,8 @@ zabbix_export:
           triggers:
             - uuid: f6d2625ec2094a1dac9e2df7476847e1
               expression: 'find(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.test.result],,"like","Done and passed")=0'
-              name: 'UPS Self Test Failed'
-              event_name: 'UPS Self Test Failed: {ITEM.VALUE}'
+              name: 'UPS self test failed'
+              event_name: 'UPS self test failed: {ITEM.VALUE}'
               priority: HIGH
               description: 'The UPS self test failed and analysis is required.'
         - uuid: de8860fb6b0f4d589e29edbb0e80a38d
@@ -363,7 +363,6 @@ zabbix_export:
             host: NUT
             key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.runtime]'
         - sortorder: '1'
-          drawtype: DASHED_LINE
           color: 1A7C11
           yaxisside: RIGHT
           calc_fnc: ALL
@@ -381,9 +380,8 @@ zabbix_export:
             host: NUT
             key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power]'
         - sortorder: '1'
-          drawtype: DASHED_LINE
+          drawtype: BOLD_LINE
           color: 1A7C11
-          yaxisside: RIGHT
           calc_fnc: ALL
           item:
             host: NUT
