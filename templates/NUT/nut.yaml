@@ -9,20 +9,19 @@ zabbix_export:
       name: NUT
       description: |
         The primary goal of the Network UPS Tools (NUT) project is to provide support for Power Devices, such as Uninterruptible Power Supplies, Power Distribution Units, Automatic Transfer Switches, Power Supply Units and Solar Controllers. NUT provides a common protocol and set of tools to monitor and manage such devices, and to consistently name equivalent features and data points, across a vast range of vendor-specific protocols and connection media types.
-
+        
         NUT provides many control and monitoring features, with a uniform control and management interface. If you are just getting acquainted with NUT, that page also explains the technical design and some possible set-ups.
-
+        
         Source: https://networkupstools.org/
       vendor:
         name: astsu777
-        version: 1.0.0
+        version: 1.0.1
       groups:
         - name: Templates
       items:
         - uuid: cbe1415589db4bb9a52cb9d2b7e16be1
           name: 'UPS Battery Charge'
-          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2]'
-          trends: '0'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.charge]'
           units: '%'
           description: 'Battery''s charge level'
           tags:
@@ -30,21 +29,20 @@ zabbix_export:
               value: NUT
           triggers:
             - uuid: 1c5b5e84e9a14f58a3349f694411e9e8
-              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2],#1)<20'
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.charge],#1)<20'
               name: 'Battery capacity is critical'
               event_name: 'Battery capacity is critical: {ITEM.VALUE}'
               priority: HIGH
               description: 'Battery needs to be charged now'
             - uuid: 7ccb9ea822bf44088ba118d7ded40fe0
-              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2],#1)<50'
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.charge],#1)<50'
               name: 'Battery capacity is low'
               event_name: 'Battery capacity is low: {ITEM.VALUE}'
               priority: AVERAGE
               description: 'Battery needs to be charged'
         - uuid: a458d64f7643473fa28738e512ffa6f9
           name: 'UPS Battery Runtime'
-          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.runtime:''| cut -d " " -f2]'
-          trends: '0'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.runtime]'
           units: s
           description: 'Battery''s lifetime with current load'
           tags:
@@ -52,7 +50,7 @@ zabbix_export:
               value: NUT
         - uuid: 0cce884fe4f84e489220085fada25eca
           name: 'UPS Manufacturer'
-          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''device.mfr:''| cut -d " " -f2]'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null device.mfr]'
           value_type: TEXT
           description: 'Manufacturer of the UPS'
           tags:
@@ -60,7 +58,7 @@ zabbix_export:
               value: NUT
         - uuid: 7fea066e613f45d48bc39a32fb3edf50
           name: 'UPS Device Model'
-          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''device.model:''| awk -F'': '' ''{print $2}'']'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null device.model]'
           value_type: TEXT
           description: 'Model of the UPS'
           tags:
@@ -68,11 +66,80 @@ zabbix_export:
               value: NUT
           triggers:
             - uuid: 781076f4b2f3446b8e9e722e8dc02be7
-              expression: 'bitlength(last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''device.model:''| awk -F'': '' ''{print $2}'']))=0'
+              expression: 'bitlength(last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null device.model]))=0'
               name: 'UPS is not detected'
               event_name: 'UPS is not detected: {ITEM.VALUE}'
               priority: HIGH
               description: 'No UPS were detected'
+        - uuid: ca1c91c843fc4c4a87cad7aa37c65d02
+          name: 'UPS Total Power'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power.nominal]'
+          units: W
+          description: 'UPS total power output'
+          tags:
+            - tag: Application
+              value: NUT
+        - uuid: 1a35a4ea89b144f4819a29f6ce09e323
+          name: 'UPS Load'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power]'
+          units: W
+          description: 'UPS current load'
+          tags:
+            - tag: Application
+              value: NUT
+        - uuid: 83a1c4ddd72849c8b2603b931fac07d1
+          name: 'UPS Status'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.status | grep -q ''OL'' && echo ''0'' || echo ''1'']'
+          value_type: FLOAT
+          trends: '0'
+          description: |
+            Status of the UPS
+            
+            OL: Online
+            OB: On Battery
+          valuemap:
+            name: 'UPS Status'
+          tags:
+            - tag: Application
+              value: NUT
+          triggers:
+            - uuid: 82bb3fe843f346ecaea2b04c86bd455b
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.status | grep -q ''OL'' && echo ''0'' || echo ''1''])<>0'
+              name: 'UPS is running on battery'
+              priority: DISASTER
+              description: 'The UPS is not online anymore and is running on battery'
+        - uuid: d30229282d644268859c675f57c7a7fd
+          name: 'UPS Self Test'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.test.result]'
+          value_type: TEXT
+          description: 'UPS'' self-test result'
+          tags:
+            - tag: Application
+              value: NUT
+          triggers:
+            - uuid: f6d2625ec2094a1dac9e2df7476847e1
+              expression: 'find(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.test.result],,"like","Done and passed")=0'
+              name: 'UPS Self Test Failed'
+              event_name: 'UPS Self Test Failed: {ITEM.VALUE}'
+              priority: HIGH
+              description: 'The UPS self test failed and analysis is required.'
+        - uuid: de8860fb6b0f4d589e29edbb0e80a38d
+          name: 'UPS Battery Status'
+          key: 'system.run[status=$(upsc {$UPS_NAME}@{$NUT_SERVER} battery.charger.status 2>/dev/null) && case "$status" in "charging") echo 1 ;; "discharging") echo 2 ;; "floating") echo 3 ;; "resting") echo 4 ;; *) echo 0 ;; esac]'
+          value_type: FLOAT
+          trends: '0'
+          description: |
+            battery.charger.status replaces the historic flags CHRG and DISCHRG that were exposed through ups.status. The battery.charger.status can have one of the following values:
+            
+            charging: battery is charging,
+            discharging: battery is discharging,
+            floating: battery has completed its charge cycle, and waiting to go to resting mode,
+            resting: the battery is fully charged, and not charging nor discharging.
+          valuemap:
+            name: 'Battery Status'
+          tags:
+            - tag: Application
+              value: NUT
       tags:
         - tag: class
           value: hardware
@@ -84,20 +151,240 @@ zabbix_export:
         - macro: '{$UPS_NAME}'
           value: ups
           description: 'Name of the remote UPS'
+      dashboards:
+        - uuid: 58140fbc1ff84ac2880cf8e81d133cae
+          name: UPS
+          pages:
+            - widgets:
+                - type: item
+                  name: Model
+                  width: '28'
+                  height: '3'
+                  fields:
+                    - type: INTEGER
+                      name: decimal_places
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: NUT
+                        key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null device.model]'
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: INTEGER
+                      name: value_size
+                      value: '30'
+                - type: item
+                  name: 'Battery Status'
+                  'y': '3'
+                  width: '28'
+                  height: '3'
+                  fields:
+                    - type: INTEGER
+                      name: decimal_places
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: NUT
+                        key: 'system.run[status=$(upsc {$UPS_NAME}@{$NUT_SERVER} battery.charger.status 2>/dev/null) && case "$status" in "charging") echo 1 ;; "discharging") echo 2 ;; "floating") echo 3 ;; "resting") echo 4 ;; *) echo 0 ;; esac]'
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: E65660
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: 2ED3B7
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: STRING
+                      name: thresholds.2.color
+                      value: FCCB1D
+                    - type: STRING
+                      name: thresholds.2.threshold
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.3.color
+                      value: 19D0D7
+                    - type: STRING
+                      name: thresholds.3.threshold
+                      value: '3'
+                    - type: STRING
+                      name: thresholds.4.color
+                      value: 3BC97D
+                    - type: STRING
+                      name: thresholds.4.threshold
+                      value: '4'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: INTEGER
+                      name: value_size
+                      value: '40'
+                - type: item
+                  name: 'Power Status'
+                  'y': '6'
+                  width: '28'
+                  height: '3'
+                  fields:
+                    - type: INTEGER
+                      name: decimal_places
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: NUT
+                        key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.status | grep -q ''OL'' && echo ''0'' || echo ''1'']'
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: STRING
+                      name: thresholds.0.color
+                      value: 3BC97D
+                    - type: STRING
+                      name: thresholds.0.threshold
+                      value: '0'
+                    - type: STRING
+                      name: thresholds.1.color
+                      value: FF4000
+                    - type: STRING
+                      name: thresholds.1.threshold
+                      value: '1'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: INTEGER
+                      name: value_size
+                      value: '40'
+                - type: item
+                  name: 'Self Status'
+                  'y': '9'
+                  width: '28'
+                  height: '3'
+                  fields:
+                    - type: INTEGER
+                      name: decimal_places
+                      value: '0'
+                    - type: ITEM
+                      name: itemid.0
+                      value:
+                        host: NUT
+                        key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.test.result]'
+                    - type: INTEGER
+                      name: show.0
+                      value: '2'
+                    - type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    - type: INTEGER
+                      name: units_show
+                      value: '0'
+                    - type: INTEGER
+                      name: value_size
+                      value: '40'
+                - type: graph
+                  name: Battery
+                  x: '28'
+                  width: '44'
+                  height: '6'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: NUT
+                        name: 'UPS Battery'
+                    - type: STRING
+                      name: reference
+                      value: AFXSQ
+                - type: graph
+                  name: Power
+                  x: '28'
+                  'y': '6'
+                  width: '44'
+                  height: '6'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: NUT
+                        name: 'UPS Power'
+                    - type: STRING
+                      name: reference
+                      value: SXCUQ
+      valuemaps:
+        - uuid: 3cd0d941c1224ea1b8c90c759538d60f
+          name: 'Battery Status'
+          mappings:
+            - value: '0'
+              newvalue: Unknown
+            - value: '1'
+              newvalue: Charging
+            - value: '2'
+              newvalue: Discharging
+            - value: '3'
+              newvalue: Floating
+            - value: '4'
+              newvalue: Resting
+        - uuid: 333ee4315c864e958bd32553722208f8
+          name: 'UPS Status'
+          mappings:
+            - value: '0'
+              newvalue: Online
+            - value: '1'
+              newvalue: 'On Battery'
   graphs:
     - uuid: 1b22f73b1edd42bdb38bba9d2d709aac
       name: 'UPS Battery'
+      show_triggers: 'NO'
       graph_items:
-        - drawtype: BOLD_LINE
+        - drawtype: GRADIENT_LINE
           color: '274482'
           calc_fnc: ALL
           item:
             host: NUT
-            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.runtime:''| cut -d " " -f2]'
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.runtime]'
         - sortorder: '1'
+          drawtype: DASHED_LINE
           color: 1A7C11
           yaxisside: RIGHT
           calc_fnc: ALL
           item:
             host: NUT
-            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null |grep ''battery.charge:''| cut -d " " -f2]'
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null battery.charge]'
+    - uuid: e91e1abc5e84479eb22619cf53cd9d9b
+      name: 'UPS Power'
+      show_triggers: 'NO'
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: FF0000
+          calc_fnc: ALL
+          item:
+            host: NUT
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power]'
+        - sortorder: '1'
+          drawtype: DASHED_LINE
+          color: 1A7C11
+          yaxisside: RIGHT
+          calc_fnc: ALL
+          item:
+            host: NUT
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power.nominal]'
