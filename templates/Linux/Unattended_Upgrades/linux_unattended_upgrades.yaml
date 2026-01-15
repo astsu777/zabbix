@@ -10,7 +10,7 @@ zabbix_export:
       description: 'Monitor unattended upgrades on Debian based distributions.'
       vendor:
         name: astsu777
-        version: 1.0.1
+        version: 1.0.2
       groups:
         - name: Templates
       items:
@@ -18,7 +18,7 @@ zabbix_export:
           name: 'Log: Installed Upgrades'
           type: ZABBIX_ACTIVE
           key: 'logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log]'
-          delay: 10m
+          delay: 30m
           history: 5d
           value_type: LOG
           description: 'Collect the unattended upgrades log which can then be parsed.'
@@ -28,9 +28,10 @@ zabbix_export:
               value: 'Unattended Upgrades'
           triggers:
             - uuid: 5ee7637ae0a048609e56374659cc2b06
-              expression: 'nodata(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log],1d)=0'
+              expression: 'nodata(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log],12h)=0'
               name: 'Updates have been installed'
               priority: INFO
+              manual_close: 'YES'
               tags:
                 - tag: Application
                   value: Unattended-Upgrades
@@ -61,7 +62,7 @@ zabbix_export:
         - uuid: e45f2de3401c417e827a9cb742affcd7
           name: 'Available Upgrades'
           key: 'system.run[/usr/bin/apt list --upgradable 2>/dev/null]'
-          delay: 5m
+          delay: 30m
           history: 5d
           value_type: TEXT
           tags:
