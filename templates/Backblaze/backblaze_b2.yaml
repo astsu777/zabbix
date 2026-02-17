@@ -1,0 +1,259 @@
+zabbix_export:
+  version: '7.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 55406630a6eb4c33a2961910859cc133
+      template: 'Backblaze B2'
+      name: 'Backblaze B2'
+      description: |
+        Monitor Backblaze B2 buckets.
+        
+        # Installation
+        
+        - By default, the script should be stored into "/usr/lib/zabbix/externalscripts"
+        - The helper script "backblaze_b2_lld.sh" must be executable by the "zabbix" user:
+          chown zabbix:zabbix backblaze_b2_lld.sh
+          chmod u+x backblaze_b2_lld.sh
+        
+        # Configuration
+        
+        - Create an applicationID that will be used by Zabbix
+        - Run the command "backblaze-b2 account authorize" and provide the applicationID and the keyID
+        
+        ## Triggers
+        
+        To enable alerts about the bucket size, clone the following host macros:
+        
+        - {$B2_MAX_GROWTH_1H:"BUCKETNAME"}
+        - {$B2_MAX_SIZE:"BUCKETNAME"}
+        
+        and replace <BUCKETNAME> with the name of the actual bucket to monitor.
+      vendor:
+        name: astsu777
+        version: 1.0.0
+      groups:
+        - name: Templates
+      items:
+        - uuid: 0141eab2e0084c6da9d95c12280b5cf9
+          name: 'B2 Bucket Information'
+          type: EXTERNAL
+          key: 'backblaze_b2_lld.sh[discover]'
+          delay: 1h
+          value_type: TEXT
+          description: 'Retrieve B2 buckets'' data'
+          timeout: 30s
+          tags:
+            - tag: Application
+              value: 'Backblaze B2'
+      discovery_rules:
+        - uuid: 37e3778afa1742b1a5cdbf04c9c1b72b
+          name: 'Buckets Discovery'
+          type: DEPENDENT
+          key: b2.discovery
+          item_prototypes:
+            - uuid: 995dba5c993c478dad9ab9d3a35a5d37
+              name: 'B2 [{#BUCKETNAME}] File Lock'
+              type: DEPENDENT
+              key: 'b2.bucket.filelock[{#BUCKETNAME}]'
+              value_type: CHAR
+              description: 'Status of file lock (immutability) on the bucket'
+              valuemap:
+                name: 'File Lock'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.[?(@.bucketName=="{#BUCKETNAME}")].fileLock.first()'
+              master_item:
+                key: 'backblaze_b2_lld.sh[discover]'
+              tags:
+                - tag: Application
+                  value: 'Backblaze B2'
+              trigger_prototypes:
+                - uuid: 0011fec7b2bd40f696f6e60b0ead4bbc
+                  expression: 'change(/Backblaze B2/b2.bucket.filelock[{#BUCKETNAME}])<>0'
+                  name: 'B2: Bucket [{#BUCKETNAME}]: File lock status has changed'
+                  priority: WARNING
+                  description: |
+                    File lock status of the B2 bucket has been modified.
+                    
+                    - true => Enabled
+                    - false => Disabled
+                  manual_close: 'YES'
+            - uuid: ebd8aa4f5ca84894ab6447cdbf1a99c3
+              name: 'B2 [{#BUCKETNAME}] ID'
+              type: DEPENDENT
+              key: 'b2.bucket.id[{#BUCKETNAME}]'
+              value_type: TEXT
+              description: 'Bucket''s unique ID'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.[?(@.bucketName=="{#BUCKETNAME}")].bucketId.first()'
+              master_item:
+                key: 'backblaze_b2_lld.sh[discover]'
+              tags:
+                - tag: Application
+                  value: 'Backblaze B2'
+              trigger_prototypes:
+                - uuid: 494a24b6e9ea4a949799b30ceea6fbd5
+                  expression: 'change(/Backblaze B2/b2.bucket.id[{#BUCKETNAME}])<>0'
+                  name: 'B2: Bucket [{#BUCKETNAME}]: ID has changed'
+                  priority: AVERAGE
+                  description: 'ID of the B2 bucket has been modified'
+                  manual_close: 'YES'
+            - uuid: 615525e9a1e547759caadffb8d5be70e
+              name: 'B2 [{#BUCKETNAME}] SSE'
+              type: DEPENDENT
+              key: 'b2.bucket.sse[{#BUCKETNAME}]'
+              value_type: CHAR
+              description: 'Bucket''s unique ID'
+              valuemap:
+                name: SSE
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.[?(@.bucketName=="{#BUCKETNAME}")].encryption.first()'
+              master_item:
+                key: 'backblaze_b2_lld.sh[discover]'
+              tags:
+                - tag: Application
+                  value: 'Backblaze B2'
+              trigger_prototypes:
+                - uuid: 53e5eebfb81e4698923c5f840312ddc6
+                  expression: 'change(/Backblaze B2/b2.bucket.sse[{#BUCKETNAME}])<>0'
+                  name: 'B2: Bucket [{#BUCKETNAME}]: SSE status has changed'
+                  priority: INFO
+                  description: |
+                    SSE (Server Side Encryption) status of the B2 bucket has been modified.
+                    
+                    - SSE-B2 => Enabled
+                    - none => Disabled
+                  manual_close: 'YES'
+            - uuid: 26c70fd4c3284b9cafcc7cf05934cdbb
+              name: 'B2 [{#BUCKETNAME}] Type'
+              type: DEPENDENT
+              key: 'b2.bucket.type[{#BUCKETNAME}]'
+              value_type: CHAR
+              description: 'Bucket''s type (private or public)'
+              valuemap:
+                name: 'Bucket Type'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.[?(@.bucketName=="{#BUCKETNAME}")].bucketType.first()'
+              master_item:
+                key: 'backblaze_b2_lld.sh[discover]'
+              tags:
+                - tag: Application
+                  value: 'Backblaze B2'
+              trigger_prototypes:
+                - uuid: fea9f234e1c64a2e9d3f69dd00af5c9c
+                  expression: 'change(/Backblaze B2/b2.bucket.type[{#BUCKETNAME}])<>0'
+                  name: 'B2: Bucket [{#BUCKETNAME}]: Type has changed'
+                  priority: INFO
+                  description: |
+                    Type of the B2 bucket has been modified.
+                    
+                    - allPrivate => Private
+                    - allPublic => Public
+                  manual_close: 'YES'
+            - uuid: e0443373cd944a848db042eb405c1f9d
+              name: 'B2 [{#BUCKETNAME}] File Count'
+              type: EXTERNAL
+              key: 'backblaze_b2_lld.sh[filecount,{#BUCKETNAME}]'
+              delay: 15m
+              trends: '0'
+              description: 'Number of files stored in the bucket'
+              tags:
+                - tag: Application
+                  value: 'Backblaze B2'
+            - uuid: b46f28bccc6a4f92910fa0978bec42ce
+              name: 'B2 [{#BUCKETNAME}] Size'
+              type: EXTERNAL
+              key: 'backblaze_b2_lld.sh[size,{#BUCKETNAME}]'
+              delay: 15m
+              trends: '0'
+              units: B
+              description: 'Bucket total size'
+              tags:
+                - tag: Application
+                  value: 'Backblaze B2'
+              trigger_prototypes:
+                - uuid: ee9b60f5d75f49bbb094014705d3ce94
+                  expression: |
+                    last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}]) -
+                    avg(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}],1h) > {$B2_MAX_GROWTH_1H:"{#BUCKETNAME}"}
+                  name: 'B2: Bucket [{#BUCKETNAME}]: Rapid growth in the last hour'
+                  event_name: 'B2: Bucket [{#BUCKETNAME}]: Rapid growth in the last hour (=> {$B2_MAX_GROWTH_1H}B)'
+                  priority: INFO
+                  description: 'The B2 bucket is growing rapidly and it may require an investigation'
+                - uuid: 741c3468af2b4c5e9b7f4d4e0cbcb324
+                  expression: 'last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}])>{$B2_MAX_SIZE:"{#BUCKETNAME}"} * {$B2.PUSED.CRIT} / 100'
+                  name: 'B2: Bucket [{#BUCKETNAME}]: Running out of free disk space'
+                  event_name: 'B2: Bucket [{#BUCKETNAME}]: Running out of free disk space (free < {$B2.PUSED.CRIT}%)'
+                  priority: AVERAGE
+                  description: 'The B2 bucket''s total size is critically reaching its maximum threshold'
+                - uuid: 9067db1c86974d73a043748f3f833caf
+                  expression: 'last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}])>{$B2_MAX_SIZE:"{#BUCKETNAME}"} * {$B2.PUSED.WARN} / 100'
+                  name: 'B2: Bucket [{#BUCKETNAME}]: Running out of free disk space'
+                  event_name: 'B2: Bucket [{#BUCKETNAME}]: Running out of free disk space (free < {$B2.PUSED.WARN}%)'
+                  priority: WARNING
+                  description: 'The B2 bucket''s total size is reaching its maximum threshold'
+                  dependencies:
+                    - name: 'B2: Bucket [{#BUCKETNAME}]: Running out of free disk space'
+                      expression: 'last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}])>{$B2_MAX_SIZE:"{#BUCKETNAME}"} * {$B2.PUSED.CRIT} / 100'
+          master_item:
+            key: 'backblaze_b2_lld.sh[discover]'
+          lld_macro_paths:
+            - lld_macro: '{#BUCKETNAME}'
+              path: $.bucketName
+      tags:
+        - tag: class
+          value: cloud
+        - tag: target
+          value: 'Backblaze B2'
+        - tag: target
+          value: s3
+      macros:
+        - macro: '{$B2.PUSED.CRIT}'
+          value: '90'
+          description: 'The critical threshold of the bucket utilization'
+        - macro: '{$B2.PUSED.WARN}'
+          value: '80'
+          description: 'The warning threshold of the bucket utilization'
+        - macro: '{$B2_MAX_GROWTH_1H:"BUCKETNAME"}'
+          value: '<SIZE_IN_BYTES>'
+          description: 'Threshold for size growth per hour'
+        - macro: '{$B2_MAX_SIZE:"BUCKETNAME"}'
+          value: '<SIZE_IN_BYTES>'
+          description: 'Threshold for maximum size of the bucket'
+      valuemaps:
+        - uuid: 7e6090abdbf248bbbf78fb31b799b269
+          name: 'Bucket Type'
+          mappings:
+            - value: allPrivate
+              newvalue: Private
+            - value: allPublic
+              newvalue: Public
+            - type: DEFAULT
+              newvalue: Unknown
+        - uuid: 0756346a4ea544939670c12873b28152
+          name: 'File Lock'
+          mappings:
+            - value: 'true'
+              newvalue: Enabled
+            - value: 'false'
+              newvalue: Disabled
+            - type: DEFAULT
+              newvalue: Unknown
+        - uuid: 9474cdaa182c4034999882979c45f49e
+          name: SSE
+          mappings:
+            - value: SSE-B2
+              newvalue: Enabled
+            - value: none
+              newvalue: Disabled
+            - type: DEFAULT
+              newvalue: Unknown
