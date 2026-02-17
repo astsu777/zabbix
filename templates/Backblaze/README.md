@@ -95,7 +95,7 @@ The following items are configured:
 |----|----------|--------|
 |B2: Bucket [{#BUCKETNAME}]: File lock status has changed|change(/Backblaze B2/b2.bucket.filelock[{#BUCKETNAME}])<>0|Warning|
 |B2: Bucket [{#BUCKETNAME}]: ID has changed|change(/Backblaze B2/b2.bucket.id[{#BUCKETNAME}])<>0|Average|
-|B2: Bucket [{#BUCKETNAME}]: Rapid growth in the last hour|last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}]) - avg(/Magvice - Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}],1h) > {$B2_MAX_GROWTH_1H:"{#BUCKETNAME}"}|Information|
+|B2: Bucket [{#BUCKETNAME}]: Rapid growth in the last hour|last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}]) - avg(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}],1h) > {$B2_MAX_GROWTH_1H:"{#BUCKETNAME}"}|Information|
 |B2: Bucket [{#BUCKETNAME}]: Running out of free disk space|last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}])>{$B2_MAX_SIZE:"{#BUCKETNAME}"} * {$B2.PUSED.WARN} / 100|Warning|
 |B2: Bucket [{#BUCKETNAME}]: Running out of free disk space|last(/Backblaze B2/backblaze_b2_lld.sh[size,{#BUCKETNAME}])>{$B2_MAX_SIZE:"{#BUCKETNAME}"} * {$B2.PUSED.CRIT} / 100|Average|
 |B2: Bucket [{#BUCKETNAME}]: SSE status has changed|change(/Backblaze B2/b2.bucket.sse[{#BUCKETNAME}])<>0|Information|
