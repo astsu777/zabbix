@@ -55,7 +55,7 @@ The following trigger prototype is configured:
 |The host needs to be restarted|-|avg(/Linux Unattended Upgrades/vfs.file.exists[/var/run/reboot-required],24h)=1|Information|
 |Unattended-upgrades package is not installed|-|last(/Linux Unattended Upgrades/vfs.file.exists[/usr/bin/unattended-upgrade])=0|Warning|
 |Updates are available|-|find(/Linux Unattended Upgrades/system.run[/usr/bin/apt list --upgradable 2>/dev/null],,"like","upgradable from")=1|Information|
-|Updates have been installed|-|nodata(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log],1d)=0|Information|
+|Updates have been installed|-|nodata(/Linux Unattended Upgrades/logrt[/var/log/unattended-upgrades/unattended-upgrades-dpkg.log],4h)=0|Information|
 
 ## Graphs
 
