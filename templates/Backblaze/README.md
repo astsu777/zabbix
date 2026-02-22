@@ -89,7 +89,7 @@ Three value mappings are configured in the template for the *Bucket Type*, *File
 |B2 [{#BUCKETNAME}] SSE|Dependent item|b2.bucket.sse[{#BUCKETNAME}]|
 |B2 [{#BUCKETNAME}] Type|Dependent item|b2.bucket.type[{#BUCKETNAME}]|
 
-The items for the file count and the size trigger API calls towards Backblaze. In total, 3 API calls are mare every 15 minutes to Backblaze B2 (1 global + 2 per bucket). All those calls are classified as *Transactions Class C* (see pricing at [Backblaze B2 Cloud Storage API Pricing Explained](https://www.backblaze.com/cloud-storage/transaction-pricing)).
+The items for the file count and the size trigger API calls towards Backblaze. In total, 3 API calls are mare every **4 hours** to Backblaze B2 (1 global + 2 per bucket). All those calls are classified as *Transactions Class C* (see pricing at [Backblaze B2 Cloud Storage API Pricing Explained](https://www.backblaze.com/cloud-storage/transaction-pricing)). Feel free to customize the template (or the discovered items to have per-bucket timers) to increase this value if your bucket is updated more often than that.
 
 
 ### Trigger Prototypes
