@@ -25,6 +25,11 @@ chmod u+x backblaze_b2_lld.sh
 **NOTE**: if the binary **is not** *backblaze-b2*, please modify the script to the correct name
 
 
+## Backblaze Pricing
+
+*Backblaze* offers a certain amount of transactions for free by default. These transactions also include API calls: some are free and others are free up until a certain threshold is reached. **It is strongely advised** to **configure caps/alerts** on your *Backblaze* account to make sure your budget does not go overboard. All the necessary information about this is available on this page: [Understand Backblaze B2 Data Caps and Alerts](https://www.backblaze.com/docs/cloud-storage-data-caps-and-alerts).
+
+
 ## Macros
 
 The following host macros are configured:
