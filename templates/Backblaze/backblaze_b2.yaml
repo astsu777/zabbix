@@ -9,30 +9,30 @@ zabbix_export:
       name: 'Backblaze B2'
       description: |
         Monitor Backblaze B2 buckets.
-        
+
         # Installation
-        
+
         - By default, the script should be stored into "/usr/lib/zabbix/externalscripts"
         - The helper script "backblaze_b2_lld.sh" must be executable by the "zabbix" user:
           chown zabbix:zabbix backblaze_b2_lld.sh
           chmod u+x backblaze_b2_lld.sh
-        
+
         # Configuration
-        
+
         - Create an applicationID that will be used by Zabbix
         - Run the command "backblaze-b2 account authorize" and provide the applicationID and the keyID
-        
+
         ## Triggers
-        
+
         To enable alerts about the bucket size, clone the following host macros:
-        
+
         - {$B2_MAX_GROWTH_1H:"BUCKETNAME"}
         - {$B2_MAX_SIZE:"BUCKETNAME"}
-        
+
         and replace <BUCKETNAME> with the name of the actual bucket to monitor.
       vendor:
         name: astsu777
-        version: 1.0.0
+        version: 1.0.1
       groups:
         - name: Templates
       items:
@@ -40,7 +40,7 @@ zabbix_export:
           name: 'B2 Bucket Information'
           type: EXTERNAL
           key: 'backblaze_b2_lld.sh[discover]'
-          delay: 1h
+          delay: 4h
           value_type: TEXT
           description: 'Retrieve B2 buckets'' data'
           timeout: 30s
@@ -77,7 +77,7 @@ zabbix_export:
                   priority: WARNING
                   description: |
                     File lock status of the B2 bucket has been modified.
-                    
+
                     - true => Enabled
                     - false => Disabled
                   manual_close: 'YES'
@@ -127,7 +127,7 @@ zabbix_export:
                   priority: INFO
                   description: |
                     SSE (Server Side Encryption) status of the B2 bucket has been modified.
-                    
+
                     - SSE-B2 => Enabled
                     - none => Disabled
                   manual_close: 'YES'
@@ -155,7 +155,7 @@ zabbix_export:
                   priority: INFO
                   description: |
                     Type of the B2 bucket has been modified.
-                    
+
                     - allPrivate => Private
                     - allPublic => Public
                   manual_close: 'YES'
@@ -163,9 +163,10 @@ zabbix_export:
               name: 'B2 [{#BUCKETNAME}] File Count'
               type: EXTERNAL
               key: 'backblaze_b2_lld.sh[filecount,{#BUCKETNAME}]'
-              delay: 15m
+              delay: 4h
               trends: '0'
               description: 'Number of files stored in the bucket'
+              timeout: 30s
               tags:
                 - tag: Application
                   value: 'Backblaze B2'
@@ -173,10 +174,11 @@ zabbix_export:
               name: 'B2 [{#BUCKETNAME}] Size'
               type: EXTERNAL
               key: 'backblaze_b2_lld.sh[size,{#BUCKETNAME}]'
-              delay: 15m
+              delay: 4h
               trends: '0'
               units: B
               description: 'Bucket total size'
+              timeout: 30s
               tags:
                 - tag: Application
                   value: 'Backblaze B2'
