@@ -105,6 +105,8 @@ zabbix_export:
                 
                 0 - ICMP ping fails;
                 1 - ICMP ping successful.
+              valuemap:
+                name: 'Service state'
               tags:
                 - tag: component
                   value: health
