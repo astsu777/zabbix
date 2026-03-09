@@ -15,7 +15,7 @@ zabbix_export:
         Source: https://networkupstools.org/
       vendor:
         name: astsu777
-        version: 1.0.1
+        version: 1.0.2
       groups:
         - name: Templates
       items:
@@ -71,9 +71,42 @@ zabbix_export:
               event_name: 'UPS is not detected: {ITEM.VALUE}'
               priority: HIGH
               description: 'No UPS were detected'
+        - uuid: 9586812ff1b548618fcda07aa9260fb2
+          name: 'UPS Voltage'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null output.voltage]'
+          units: V
+          description: 'UPS current voltage'
+          tags:
+            - tag: Application
+              value: NUT
+          triggers:
+            - uuid: 55beffe9e1ad488eb89e39aeed993b2b
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null output.voltage])>250'
+              name: 'UPS output voltage high'
+              priority: HIGH
+              description: 'A high voltage may indicate grid instability'
+            - uuid: 0821f52a40364403a72cbebd58c3604a
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null output.voltage])<210'
+              name: 'UPS output voltage low'
+              priority: HIGH
+              description: 'A brownout (low voltage) may be dangerous to equipment connected to the UPS'
+        - uuid: f2b242fc10a949e78f609205af2c505d
+          name: 'UPS Load Percentage'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.load]'
+          units: '%'
+          description: 'UPS current load in percent'
+          tags:
+            - tag: Application
+              value: NUT
+          triggers:
+            - uuid: ddb43144f2e5448293caa0f3bc1e8480
+              expression: 'last(/NUT/system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.load])>=80'
+              name: 'UPS load is too high'
+              priority: DISASTER
+              description: 'The load puts on the UPS is too high'
         - uuid: ca1c91c843fc4c4a87cad7aa37c65d02
           name: 'UPS Total Power'
-          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power.nominal]'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.realpower.nominal]'
           units: W
           description: 'UPS total power output'
           tags:
@@ -81,7 +114,7 @@ zabbix_export:
               value: NUT
         - uuid: 1a35a4ea89b144f4819a29f6ce09e323
           name: 'UPS Load'
-          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power]'
+          key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.realpower]'
           units: W
           description: 'UPS current load'
           tags:
@@ -97,6 +130,9 @@ zabbix_export:
             
             OL: Online
             OB: On Battery
+            LB: Low Battery
+            RB: Replace Battery
+            OVER: Overload
           valuemap:
             name: 'UPS Status'
           tags:
@@ -378,11 +414,11 @@ zabbix_export:
           calc_fnc: ALL
           item:
             host: NUT
-            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power]'
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.realpower]'
         - sortorder: '1'
           drawtype: BOLD_LINE
           color: 1A7C11
           calc_fnc: ALL
           item:
             host: NUT
-            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.power.nominal]'
+            key: 'system.run[/usr/bin/upsc {$UPS_NAME}@{$NUT_SERVER} 2>/dev/null ups.realpower.nominal]'
